@@ -1,0 +1,304 @@
+---
+[Link to project 1](/Project1)
+title: "EDA Project"
+output:
+  html_document: default
+  pdf_document: default
+---
+###Sydney Pham (sep2576)
+#Introduction 
+####The first dataset I decided to use contains ramen ratings for over 3,000 different types of ramen from across the world. Originally titled "ramen_ratings", I acquired this dataset from tidytuesday on Github. This dataset was created by Hans Lienesch, a man who has dedicated his life to eating and rating ramen. Each entry contains a review number, the brand of ramen, the variety of ramen, country of origin, packaging style, and rating on a continuous scale of 0.0-5.0 stars. This dataset was interesting to me because I recently traveled to Japan, the birthplace of ramen. I also love eating this dish, but I had no idea that someone would dedicate their life to tasting and rating packaged ramen! Such a large dataset related to ramen piqued my interest, and I thought it would be fun to explore it.
+####The second dataset I chose was from the World Happiness Report, a survey that investigates and scores happiness levels based on a variety of factors in over 150 countries around the world. I found this dataset from kaggle, and decided to use it because I thought it would be a good complimentary dataset to the ramen one. Happiness scores are based off of data collected by the Gallup World Poll. This specific dataset has the happiness score and happiness rank for 155 countries based on life expectancy, family, ecocnomy, generosity, trust in the government, freedom, and a dystopia residual. The sum of these seven factors equals the happiness score, and the happiness score determines the happiness rank. The dystopia residual is a benchmark score to compare all countries to a world with the least-happiest people. Starting out, I am not sure what associations I will find, if any. Since ramen was invented in Japan, perhaps people in Japan will have a higher affinity to making and eating ramen and thus, have a higher happiness score.
+
+ 
+```{R}
+install.packages("tidyr")
+library(tidyverse)
+library(dplyr)
+
+ramen_ratings <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-06-04/ramen_ratings.csv")
+
+happy2017 = read.csv("2017.csv")
+```
+
+#Tidying
+####The ramen dataset was fairly tidy to begin with, so I used a spread function (and pivot_wider function for demonstration purposes) to "untidy" the data so that style of the ramen was spread over multiple columns. This created separate columns for each style of ramen (package, bowl, bar, etc). I then used pivot_longer() to tidy the data to categorize different styles of ramen into one column under the name "style". I also included a command to delete extra rows created by the pivot_longer function and delete any rows with NAs in the original data set. After trying to join the ramen and happy dataset together, I realized there was more tidying to be done. There was one mispelling of Phillipines, so I renamed it to be spelled correctly. Dubai was listed as its own country, so I renamed it to its country (United Arab Emirates). Sarawak was listed as its own country in the ramen_ratings dataset, but it is a state of Malaysia, so I renamed it as Malaysia. The United States was referred to as "United States" except for one instance it was referred to as "USA", so I renamed that instance to match the other entires. Because the happiness report only surveyed the Netherlands as a a whole, I also renamed Holland to Netherlands since it is a province in the Netherlands. In the end, there was still one row with an NA, so I included one more command to delete it. In total, there were 15 rows that were deleted from the original ramen ratings dataset after removing all rows that contained NA.
+```{R}
+#"untidying" ramen data
+ramen_wide <- ramen_ratings %>% spread(key="style", value = "stars")
+
+#"unitidying" ramen data
+ramen_wide2 <- ramen_ratings %>% pivot_wider(names_from = "style", values_from = "stars")
+
+#tidying ramen data
+ramen <- ramen_wide2 %>% pivot_longer(cols = c(5:13), names_to= "style", values_to = "stars", values_drop_na = T)
+
+#fixing mispelling of Philipines
+ramen <- ramen %>% mutate(country=str_replace(country, "Phlippines", "Philippines"))
+
+#renaming Dubai to its country United Arab Emirates
+ramen <- ramen %>% mutate(country=str_replace(country, "Dubai", "United Arab Emirates"))
+
+#renaming Sarawak to its country Malaysia
+ramen <- ramen %>% mutate(country=str_replace(country,"Sarawak", "Malaysia"))
+
+#renaming USA to United States
+ramen <- ramen %>% mutate(country=str_replace(country,"USA", "United States"))
+
+#renaming Holland to Netherlands
+ramen <- ramen %>% mutate(country=str_replace(country,"Holland", "Netherlands"))
+
+ramen %>% summarize_all(function(x)sum(is.na(x)))
+
+#Deleting the row that does not contain a review number
+ramen <- ramen %>% na.omit
+
+#Testing to see how many rows were deleted from the orginal dataset
+nrow(ramen_ratings) - nrow(ramen)
+
+
+
+```
+
+####The happy dataset was fairly tidy to begin with as well. I decided to remove the Whisker.high and Whisker.low columns, which represent the 95% confidence regions for the happiness score estimates, because I do not plan on using them. Since there were no NAs in the happy dataset, I did not have to remove any. Similar to the ramen dataset, I realized there was more cleaning up to be done after initally trying to merge the two datasets. I had to do some renaming within the country column to make the joining more fluid. The happiness dataset labeled Taiwan as "Taiwan Province of China" and China as "China S.A.R., China", so I removed the endings to label them as "Taiwan" and "China", respectively.Additionally, I renamed "United Kingdom" to its abbreviation "UK" to better match the name in the ramen dataset. I also renamed the first column from "Country" to "country" so that I could merge the two datasets by this name.
+```{R}
+#tidying happy data - deleting Whisker high and low columns
+happy <- select(happy2017, -c("Whisker.high", "Whisker.low"))
+
+#renaming Taiwan Province of China to Taiwan
+happy <- happy%>%mutate(Country = str_remove(Country, " Province of China"))
+
+#renaming China S.A.R., China to China
+happy <- happy%>%mutate(Country= str_remove(Country, " S.A.R., China"))
+
+#renaming United Kingdom to its abbreviation
+happy <- happy %>% mutate(Country=str_replace(Country, "United Kingdom", "UK"))
+
+#renaming the column to "country" to match ramen dataset
+names(happy)[1] <- "country"
+
+happy %>% summarize_all(function(x)sum(is.na(x)))
+
+```
+
+
+#Joining/Merging
+####Before joining, I did a little more exploring of the datasets and found that there are 39 countries from the happy dataset that also appear in the ramen dataset. Using setdiff command I found the list of names of countries in the happy dataset that will be dropped upon merging. It was a total of 111 countries, meaning that the ramen dataset does not have ramen ratings from these 111 countries that appear in the happy dataset. I decided to join the two datasets by their common variable, country. I used a left join because I wanted to make sure to keep all rows from the ramen dataset since I am especially interested in ramen ratings in relation to the global happiness dataset. Upon intially trying to join the two datasets, I encountered some problems, specifically with the joining ID "country" and the labels within those columns across the two datasets. Between the two datasets, there were some countries that were labeled differntly, and some cities or states (rather than their country) were used as the label. For example, in the happy dataset, Taiwan was labeled "Taiwan Province of China", and the city of Dubai was used rather than its country United Arab Emirates. Because of this, I went back to the earlier tidying sections and addressed those problems there. After joining, I still had four rows with NAs. The ramen dataset had Fiji as a country, but the happiness report did not survey Fiji. Because I don't have a happiness score for Fiji, I decided to delete these four rows from the merged dataset. I also created a new variable "Continent" and assigned countries to their respective continent.
+
+
+```{R}
+#comparing the datasets before merging
+happy%>% nrow()
+ramen%>%nrow()
+
+sum(happy$country %in% ramen$country)
+setdiff(happy$country, ramen$country)
+
+
+#joining ramen and happy datasets
+ramen_happy <- left_join(ramen,happy, by="country")
+
+#checking to see how many NAs there are
+ramen_happy%>% summarize_all(function(x)sum(is.na(x)))
+
+#removing the rows without a happiness score
+ramen_happy <- ramen_happy %>% na.omit
+
+
+
+
+```
+
+
+```{R}
+#creating a new column for continent
+ramen_happy %>% summarize_all(n_distinct)
+list(ramen_happy$country%>%unique)
+
+ramen_happy$Continent <- NA
+
+ramen_happy$Continent[which(ramen_happy$country %in% c("Thailand", "Japan", "Taiwan", "South Korea", "Hong Kong", "Malaysia", "China", "Philippines", "Vietnam", "Bangladesh", "Singapore", "India", "Indonesia", "Pakistan", "Nepal", "Myanmar", "Cambodia", "United Arab Emirates"))] <- "Asia"
+
+ramen_happy$Continent[which(ramen_happy$country %in% c("France", "Ukraine", "Russia", "Netherlands", "Italy", "Poland", "Germany", "Hungary", "UK", "Finland","Sweden", "Estonia"))] <- "Europe"
+
+ramen_happy$Continent[which(ramen_happy$country %in% c("United States", "Canada", "Mexico"))] <- "North America"
+
+ramen_happy$Continent[which(ramen_happy$country %in% c("Australia", "New Zealand"))] <- "Australia"
+
+ramen_happy$Continent[which(ramen_happy$country %in% c("Nigeria", "Ghana"))] <- "Africa"
+
+ramen_happy$Continent[which(ramen_happy$country %in% c("Brazil", "Colombia"))] <- "South America"
+
+ramen_happy %>% summarize_all(function(x)sum(is.na(x)))
+```
+
+#Wrangling
+####In this dataset, there are 453 distinct brands of ramen and 2,954 different varieties from 39 distinct countries. The most common style of ramen rated is in a pack with 1,813 different ratings. The second most common is bowl ramen with 612 ratings, followed by cup ramen with 559 ratings. Out of all of the different styles, ramen in a bar has the highest average rating with 5.0 stars, followed by box ramen with 4.21 stars. The most common brand of ramen rated is Nissin with 443 ramen ratings, followed by Nongshim, and the Maruchan. The continent with the highest mean ramen rating is South America with 3.79 stars while the country with the highest mean ramen rating is Cambodia with 4.2 stars. The brand with the highest average rating is Best Wok with a rating of 5.0. Looking at average happiness scores in decreasing order, continents are ordered Australia, North America, Europe, South America, Asia, and Africa last. Within this merged ramen and happiness dataset, the top 5 happiest countries are Finland, Netherlands, Canada, New Zealand, and Australia, respectively. The United States is ranked 7th. Because ramen is considered an Asian dish, I was interested to see what were the most commonly rated brands in Asia. I found that Nissin was the most commonly rated brand from Asia.  And since ramen was actually invented in Japan, I was interested to see what the highest rated brand in Japan was. I found it to be a tie for 5.0 stars between Fukumen, Higashi, Kimura, MyKuali, Seven & I, Takamori, and Torishi.  Packaged ramen sometimes gets a bad rap for being unhealthy and full of MSG. I wanted to see how much health life expectancy factored into overall happiness. For this, I created a new column that was a function of two other columns to obtain the percent health life expectancy played into overall happiness. I found that  health life expectancy played 15.4% into the overall happiness score in Japan while health life expectancy played 11.01% into the overall happiness score in the United States. 
+```{R}
+#determining which ramen brand has the overall highest average rating 
+ramen_happy %>% group_by(brand) %>% 
+  summarize(mean_rating=mean(stars, na.rm = T)) %>% 
+  slice(which.max(mean_rating))
+
+```
+
+
+```{R}
+#determining which country has the highest average ramen rating 
+ramen_happy %>% group_by(country) %>% 
+  summarize(mean_rating=mean(stars, na.rm = T)) %>% 
+  slice(which.max(mean_rating))
+```
+
+
+```{R}
+#determining average ramen rating by continent
+ramen_happy %>% group_by(Continent) %>% summarize(mean_ramen=mean(stars, na.orm=T)) 
+```
+
+```{R}
+#determining which continent has the highest average ramen rating
+ramen_happy %>% group_by(Continent) %>% 
+  summarize(mean_rating=mean(stars, na.rm = T)) %>% 
+  slice(which.max(mean_rating))
+```
+
+
+```{R}
+#determining the total number of varieties per brand 
+ramen_happy %>% select(brand, variety) %>% group_by(brand) %>% summarize(n=n()) %>%  arrange(desc(n))
+
+```
+
+```{R}
+#determining count per style 
+ramen_happy %>% group_by(style) %>% count()
+
+
+```
+
+```{R}
+#determining which style of ramen has the overall highest average rating 
+ramen_happy %>% group_by(style) %>%  summarize(mean_rating=mean(stars, na.rm = T)) %>% 
+  arrange(desc(mean_rating))
+```
+
+
+```{R}
+#determining which country has the highest happiness score 
+happy_country <- ramen_happy%>% select(country, stars, Happiness.Score) %>% arrange(desc(Happiness.Score))
+  
+happy_country %>% group_by(country) %>% summarize(mean_happy=mean(Happiness.Score, na.rm = T)) %>% arrange(desc(mean_happy))
+
+
+```
+
+
+```{R}
+#determining which continent has the highest happiness score
+ramen_happy %>% group_by(Continent) %>% 
+  summarize(mean_happy=mean(Happiness.Score, na.rm = T)) %>% arrange(desc(mean_happy))
+```
+
+
+```{R}
+#determining the most common brand in Asia
+ramen_happy%>% filter(Continent=="Asia") %>% group_by(brand) %>% count() %>% arrange(desc(n))
+
+```
+
+```{R}
+#determining highest rated brand in Japan
+ramen_happy%>% filter(country=="Japan") %>% 
+  group_by(brand) %>% 
+  summarize(mean_rating=mean(stars, na.rm = T)) %>% 
+  arrange(desc(mean_rating))
+
+#counting number of varieties within different brands in Japan
+ramen_happy%>% filter(country=="Japan") %>% 
+  group_by(brand) %>% count()
+```
+
+```{R}
+#determining how much health life expectancy plays into overall happiness score on average in each continent 
+
+ramen_happy <- ramen_happy%>%mutate(Life_Happy=(Health..Life.Expectancy./Happiness.Score)*100)
+
+```
+
+
+###Visualization 
+####For the first plot, I decided to plot average happiness score against average ramen rating and fill by continent. I was hoping to see that a higher ramen score was associated with a higher ramen score. However, this was not exactly the case as I cannot gather a clear association between average ramen rating and happiness score from this plot. It is true that Africa has the lowest average ramen rating and the lowest average happiness score. However, Australia has the highest happiness score, but only a mediocre average ramen rating. Asia and South America have very similar average ramen ratings, but South America has over a 0.5 increase in average happiness score than Asia.  While I had initially hoped to find some association, I realize that there are many more factors that affect continental happiness than ramen, so it is not surprising to not find a clear association between these two variables. 
+
+```{R}
+ramen_happy %>% group_by(Continent) %>% summarize(mean_ramen=mean(stars, na.orm=T), mean_happy=mean(Happiness.Score, na.rm = T)) %>% ggplot(aes(mean_ramen, mean_happy, color=Continent)) + geom_point(size=4) + ggtitle("Average Happiness and Ramen Rating Across Continents") + xlab("Average Ramen Rating") + ylab("Average Happiness Score") +scale_x_continuous(lim=c(2.5,4)) + scale_y_continuous(lim=c(4,8)) + theme_minimal() 
+
+
+```
+
+####For the second plot, I plotted average rating by style of ramen across continent of origin. Some continents did not have every type of ramen due to surveying purposes (lack of data within the ramen dataset). For example, Africa only had ramen in a pack. I was most interested in Asia and North America because they seemed to have the most variety of styles of ramen rated. In Asia, ramen in a box seemed to have the highest average rating, followed by ramen in a pack. Overall, all ramen from Asia appeared to have an average rating greater than 3 stars. In North America, ramen in a bar appeared to have the highest average rating. Ramen in a box appeared to have the lowest rating, and all the rest of the styles had about the same rating. In Australia, ramen in a bowl appeared to have a significantly higher average rating than the other styles. In South America and Europe, of all the styles rated, they all seemed to have similar ratings within their respective continents. 
+
+```{R}
+ramen_happy %>% group_by(Continent, style) %>% summarize(mean_rating=mean(stars,na.rm=T)) %>% ggplot(aes(style, mean_rating, fill=style)) + geom_bar(stat="summary") + ggtitle("Average rating by Style across Continent of Origin") + xlab("Style") + ylab("Average rating") + facet_wrap(~Continent) + theme(axis.text.x=element_text(angle=45, hjust=1)) 
+```
+#Dimensionality Reduction - PCA
+####I plotted the proportion of variance explained by each principal component from the largest eigen value to the smallest. I found that the first PC only accounts for 38% of the variance. The first two PCs account for 63% of the variance. The first three PCs account for 83% of the variance. Because one of the ways to distinguish how many PCs to keep is how many accounts for at least 80% of the variance, it appears that the first three PCs is an acceptable number to keep. 
+
+```{R}
+happy1 <- ramen_happy %>% select(Happiness.Score, Health..Life.Expectancy., Family, Economy..GDP.per.Capita., Freedom, Generosity, Trust..Government.Corruption., Dystopia.Residual)
+happy_numeric <- happy1 %>% select_if(is.numeric) %>% scale
+rownames(happy_numeric) <- happy1$Name
+happy_pca <- princomp(happy_numeric)
+names(happy_pca)
+summary(happy_pca, loadings=T)
+
+eigval_happy <- happy_pca$sdev^2
+varprop_happy = round(eigval_happy/sum(eigval_happy), 2)
+
+ggplot() + geom_bar(aes(y=varprop_happy, x=1:8), stat = "identity") + xlab("") + geom_path(aes(y=varprop_happy, x=1:8)) + geom_text(aes(x=1:8, y=varprop_happy, label=round(varprop_happy, 2)), vjust=1, col="white", size=5) + scale_y_continuous(breaks=seq(0,.6,.2), labels=scales::percent) + scale_x_continuous(breaks=1:10)
+```
+```{R}
+round(cumsum(eigval_happy)/sum(eigval_happy), 2)
+
+eigval_happy
+```
+
+```{R}
+#plotting scores to show happy data with respect to the first 2 PC's
+ggplot() + geom_point(aes(happy_pca$scores[,1], happy_pca$scores[,2] )) +xlab("PC1") + ylab("PC2") + ggtitle("PC1 vs PC2") 
+
+```
+
+#For PC1 and PC2, I made a plot of the loadings. All of the vectors were pointing in a similar direction with the exception of the dystopia residual. The trust in the government and economy per gdp vectors had a small angle between them, which means that they are higher correlated. The family and freedom vectors made small angles with the happiness score, which implies that family and freedom are more highly correlated with overall happiness score. PC1 represents overall happiness score while PC2 represents health life expectancy. When graphing the first PC against the second PC (colored by continent), it is hard to see differences among factors related to happiness score on the first two PCs. There is not a clear separation or correlation. Because PC1 through PC3 represented over 80% of the variability, I decided to plot PC2 against PC3. When looking at the plot of the loading scores, the vectors are pointing in all different directions meaning that they have low correlations between one another. The smallest angle between vectors (meaning highest correlation) appears to be between family and generosity. When making a scatter plot of PC2 and PC3, it is still difficult to see differnces among PC2 and PC3. There is not a clear separation or correlation between health life expectancy and family. The principal component analysis did not yield clear information about correlations between different factors or how such factors may contribute to overall happiness, meaning that it is inconclusive. 
+
+```{R}
+library(tidyverse)
+
+#looking at PC1 and PC2
+
+happy_pca2 <- happy_numeric %>% scale() %>% prcomp() 
+names(happy_pca2)
+
+happy_pca2$rotation[,1:2]%>%as.data.frame%>%rownames_to_column%>%
+ggplot()+geom_hline(aes(yintercept=0),lty=2)+
+geom_vline(aes(xintercept=0),lty=2)+ylab("PC2")+xlab("PC1")+
+geom_segment(aes(x=0,y=0,xend=PC1,yend=PC2),arrow=arrow(),col="red")+
+geom_label(aes(x=PC1*1.1,y=PC2*1.1,label=rowname)) + ggtitle("Plot of Loading Scores of PC1 vs PC2") 
+
+
+happy_pca2$x%>%as.data.frame%>%mutate(Continent=ramen_happy$Continent)%>%ggplot(aes(PC1,PC2,col=Continent))+geom_point() + ggtitle("Principal Component Plot of Average Happiness Score against Life Expectancy") 
+
+```
+
+
+```{R} 
+happy_pca2$rotation[,2:3]%>%as.data.frame%>%rownames_to_column%>%
+ggplot()+geom_hline(aes(yintercept=0),lty=3)+
+geom_vline(aes(xintercept=0),lty=3)+ylab("PC2")+xlab("PC3")+
+geom_segment(aes(x=0,y=0,xend=PC2,yend=PC3),arrow=arrow(),col="red")+
+geom_label(aes(x=PC2*1.1,y=PC3*1.1,label=rowname)) + ggtitle("Plot of Loading Scores of PC2 v PC3") 
+
+
+happy_pca2$x%>%as.data.frame%>%mutate(Continent=ramen_happy$Continent)%>%ggplot(aes(PC2,PC3,col=Continent))+geom_point() + ggtitle("Principle Component Plot of Life Expectancy and Family") 
+```
+
