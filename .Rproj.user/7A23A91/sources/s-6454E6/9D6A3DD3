@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1575919665359.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "9D6A3DD3",
+    "lastKnownWriteTime" : 1575919929,
+    "last_content_update" : 1575919929544,
+    "path" : "~/Desktop/website/content/blog/2019-12-09-graduation.Rmd",
+    "project_path" : "content/blog/2019-12-09-graduation.Rmd",
+    "properties" : {
+        "cursorPosition" : "9,439",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 10,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
