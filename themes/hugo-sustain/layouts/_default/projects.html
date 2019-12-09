@@ -1,6 +1,12 @@
-{{ range $i, $el := .Site.Data.projects.source }}
-<h5>
-<i class="{{ .icon }}"></i>&nbsp;&nbsp;
-<strong><a href="#">Project {{ add $i 1 }}</a></strong>&nbsp;-&nbsp;{{ $el.description }}
-</h5>
-{{ end }}
+
+
+<section id="projects">
+  <div class="container">
+    <h3>{{ .Site.Data.projects.name }}</h3>
+    <div class="panel panel-default">
+      <div class="panel-body">
+{{.Content}}
+      </div>
+    </div>
+  </div>
+</section>

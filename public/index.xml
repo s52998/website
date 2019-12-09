@@ -26,7 +26,7 @@
       <pubDate>Mon, 09 Dec 2019 00:00:00 +0000</pubDate>
       
       <guid>/blog/introduction-to-python/</guid>
-      <description></description>
+      <description> import numpy as np import json a=np.array([range(10)]) a**2 ## array([[ 0, 1, 4, 9, 16, 25, 36, 49, 64, 81]]) </description>
     </item>
     
     <item>

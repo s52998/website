@@ -7,3 +7,17 @@ categories: []
 tags: []
 description: ''
 ---
+
+```{r setup, include=FALSE}
+#install.packages("reticulate")
+library(reticulate)
+
+```
+
+```{python}
+import numpy as np
+import json 
+a=np.array([range(10)])
+a**2
+```
+
