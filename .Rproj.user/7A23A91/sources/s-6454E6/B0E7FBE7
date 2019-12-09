@@ -5,7 +5,7 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "0",
+    "hash" : "4294126683",
     "id" : "B0E7FBE7",
     "lastKnownWriteTime" : 1575692406,
     "last_content_update" : 1575692406425,
@@ -18,7 +18,7 @@
     "read_only" : false,
     "read_only_alternatives" : [
     ],
-    "relative_order" : 7,
+    "relative_order" : 8,
     "source_on_save" : false,
     "source_window" : "",
     "type" : "css"

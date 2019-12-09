@@ -1,0 +1,487 @@
+---
+title: "EDA Project"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+
+
+<p>###Sydney Pham
+#Introduction
+####The first dataset I decided to use contains ramen ratings for over 3,000 different types of ramen from across the world. Originally titled “ramen_ratings”, I acquired this dataset from tidytuesday on Github. This dataset was created by Hans Lienesch, a man who has dedicated his life to eating and rating ramen. Each entry contains a review number, the brand of ramen, the variety of ramen, country of origin, packaging style, and rating on a continuous scale of 0.0-5.0 stars. This dataset was interesting to me because I recently traveled to Japan, the birthplace of ramen. I also love eating this dish, but I had no idea that someone would dedicate their life to tasting and rating packaged ramen! Such a large dataset related to ramen piqued my interest, and I thought it would be fun to explore it.
+####The second dataset I chose was from the World Happiness Report, a survey that investigates and scores happiness levels based on a variety of factors in over 150 countries around the world. I found this dataset from kaggle, and decided to use it because I thought it would be a good complimentary dataset to the ramen one. Happiness scores are based off of data collected by the Gallup World Poll. This specific dataset has the happiness score and happiness rank for 155 countries based on life expectancy, family, ecocnomy, generosity, trust in the government, freedom, and a dystopia residual. The sum of these seven factors equals the happiness score, and the happiness score determines the happiness rank. The dystopia residual is a benchmark score to compare all countries to a world with the least-happiest people. Starting out, I am not sure what associations I will find, if any. Since ramen was invented in Japan, perhaps people in Japan will have a higher affinity to making and eating ramen and thus, have a higher happiness score.</p>
+<pre class="r"><code>#install.packages(&quot;tidyr&quot;)
+library(tidyverse)</code></pre>
+<pre><code>## ── Attaching packages ─────────── tidyverse 1.3.0 ──</code></pre>
+<pre><code>## ✔ ggplot2 3.2.1     ✔ purrr   0.3.3
+## ✔ tibble  2.1.3     ✔ dplyr   0.8.3
+## ✔ tidyr   1.0.0     ✔ stringr 1.4.0
+## ✔ readr   1.3.1     ✔ forcats 0.4.0</code></pre>
+<pre><code>## ── Conflicts ────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(dplyr)
+
+ramen_ratings &lt;- readr::read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-06-04/ramen_ratings.csv&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   review_number = col_double(),
+##   brand = col_character(),
+##   variety = col_character(),
+##   style = col_character(),
+##   country = col_character(),
+##   stars = col_double()
+## )</code></pre>
+<pre class="r"><code>happy2017 = read.csv(&quot;2017.csv&quot;)</code></pre>
+<p>#Tidying
+####The ramen dataset was fairly tidy to begin with, so I used a spread function (and pivot_wider function for demonstration purposes) to “untidy” the data so that style of the ramen was spread over multiple columns. This created separate columns for each style of ramen (package, bowl, bar, etc). I then used pivot_longer() to tidy the data to categorize different styles of ramen into one column under the name “style”. I also included a command to delete extra rows created by the pivot_longer function and delete any rows with NAs in the original data set. After trying to join the ramen and happy dataset together, I realized there was more tidying to be done. There was one mispelling of Phillipines, so I renamed it to be spelled correctly. Dubai was listed as its own country, so I renamed it to its country (United Arab Emirates). Sarawak was listed as its own country in the ramen_ratings dataset, but it is a state of Malaysia, so I renamed it as Malaysia. The United States was referred to as “United States” except for one instance it was referred to as “USA”, so I renamed that instance to match the other entires. Because the happiness report only surveyed the Netherlands as a a whole, I also renamed Holland to Netherlands since it is a province in the Netherlands. In the end, there was still one row with an NA, so I included one more command to delete it. In total, there were 15 rows that were deleted from the original ramen ratings dataset after removing all rows that contained NA.</p>
+<pre class="r"><code>#&quot;untidying&quot; ramen data
+ramen_wide &lt;- ramen_ratings %&gt;% spread(key=&quot;style&quot;, value = &quot;stars&quot;)
+
+#&quot;unitidying&quot; ramen data
+ramen_wide2 &lt;- ramen_ratings %&gt;% pivot_wider(names_from = &quot;style&quot;, values_from = &quot;stars&quot;)
+
+#tidying ramen data
+ramen &lt;- ramen_wide2 %&gt;% pivot_longer(cols = c(5:13), names_to= &quot;style&quot;, values_to = &quot;stars&quot;, values_drop_na = T)
+
+#fixing mispelling of Philipines
+ramen &lt;- ramen %&gt;% mutate(country=str_replace(country, &quot;Phlippines&quot;, &quot;Philippines&quot;))
+
+#renaming Dubai to its country United Arab Emirates
+ramen &lt;- ramen %&gt;% mutate(country=str_replace(country, &quot;Dubai&quot;, &quot;United Arab Emirates&quot;))
+
+#renaming Sarawak to its country Malaysia
+ramen &lt;- ramen %&gt;% mutate(country=str_replace(country,&quot;Sarawak&quot;, &quot;Malaysia&quot;))
+
+#renaming USA to United States
+ramen &lt;- ramen %&gt;% mutate(country=str_replace(country,&quot;USA&quot;, &quot;United States&quot;))
+
+#renaming Holland to Netherlands
+ramen &lt;- ramen %&gt;% mutate(country=str_replace(country,&quot;Holland&quot;, &quot;Netherlands&quot;))
+
+ramen %&gt;% summarize_all(function(x)sum(is.na(x)))</code></pre>
+<pre><code>## # A tibble: 1 x 6
+##   review_number brand variety country style stars
+##           &lt;int&gt; &lt;int&gt;   &lt;int&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;
+## 1             1     0       0       0     0     0</code></pre>
+<pre class="r"><code>#Deleting the row that does not contain a review number
+ramen &lt;- ramen %&gt;% na.omit
+
+#Testing to see how many rows were deleted from the orginal dataset
+nrow(ramen_ratings) - nrow(ramen)</code></pre>
+<pre><code>## [1] 15</code></pre>
+<p>####The happy dataset was fairly tidy to begin with as well. I decided to remove the Whisker.high and Whisker.low columns, which represent the 95% confidence regions for the happiness score estimates, because I do not plan on using them. Since there were no NAs in the happy dataset, I did not have to remove any. Similar to the ramen dataset, I realized there was more cleaning up to be done after initally trying to merge the two datasets. I had to do some renaming within the country column to make the joining more fluid. The happiness dataset labeled Taiwan as “Taiwan Province of China” and China as “China S.A.R., China”, so I removed the endings to label them as “Taiwan” and “China”, respectively.Additionally, I renamed “United Kingdom” to its abbreviation “UK” to better match the name in the ramen dataset. I also renamed the first column from “Country” to “country” so that I could merge the two datasets by this name.</p>
+<pre class="r"><code>#tidying happy data - deleting Whisker high and low columns
+happy &lt;- select(happy2017, -c(&quot;Whisker.high&quot;, &quot;Whisker.low&quot;))
+
+#renaming Taiwan Province of China to Taiwan
+happy &lt;- happy%&gt;%mutate(Country = str_remove(Country, &quot; Province of China&quot;))
+
+#renaming China S.A.R., China to China
+happy &lt;- happy%&gt;%mutate(Country= str_remove(Country, &quot; S.A.R., China&quot;))
+
+#renaming United Kingdom to its abbreviation
+happy &lt;- happy %&gt;% mutate(Country=str_replace(Country, &quot;United Kingdom&quot;, &quot;UK&quot;))
+
+#renaming the column to &quot;country&quot; to match ramen dataset
+names(happy)[1] &lt;- &quot;country&quot;
+
+happy %&gt;% summarize_all(function(x)sum(is.na(x)))</code></pre>
+<pre><code>##   country Happiness.Rank Happiness.Score Economy..GDP.per.Capita. Family
+## 1       0              0               0                        0      0
+##   Health..Life.Expectancy. Freedom Generosity Trust..Government.Corruption.
+## 1                        0       0          0                             0
+##   Dystopia.Residual
+## 1                 0</code></pre>
+<p>#Joining/Merging
+####Before joining, I did a little more exploring of the datasets and found that there are 39 countries from the happy dataset that also appear in the ramen dataset. Using setdiff command I found the list of names of countries in the happy dataset that will be dropped upon merging. It was a total of 111 countries, meaning that the ramen dataset does not have ramen ratings from these 111 countries that appear in the happy dataset. I decided to join the two datasets by their common variable, country. I used a left join because I wanted to make sure to keep all rows from the ramen dataset since I am especially interested in ramen ratings in relation to the global happiness dataset. Upon intially trying to join the two datasets, I encountered some problems, specifically with the joining ID “country” and the labels within those columns across the two datasets. Between the two datasets, there were some countries that were labeled differntly, and some cities or states (rather than their country) were used as the label. For example, in the happy dataset, Taiwan was labeled “Taiwan Province of China”, and the city of Dubai was used rather than its country United Arab Emirates. Because of this, I went back to the earlier tidying sections and addressed those problems there. After joining, I still had four rows with NAs. The ramen dataset had Fiji as a country, but the happiness report did not survey Fiji. Because I don’t have a happiness score for Fiji, I decided to delete these four rows from the merged dataset. I also created a new variable “Continent” and assigned countries to their respective continent.</p>
+<pre class="r"><code>#comparing the datasets before merging
+happy%&gt;% nrow()</code></pre>
+<pre><code>## [1] 155</code></pre>
+<pre class="r"><code>ramen%&gt;%nrow()</code></pre>
+<pre><code>## [1] 3165</code></pre>
+<pre class="r"><code>sum(happy$country %in% ramen$country)</code></pre>
+<pre><code>## [1] 39</code></pre>
+<pre class="r"><code>setdiff(happy$country, ramen$country)</code></pre>
+<pre><code>##   [1] &quot;Norway&quot;                   &quot;Denmark&quot;                 
+##   [3] &quot;Iceland&quot;                  &quot;Switzerland&quot;             
+##   [5] &quot;Israel&quot;                   &quot;Costa Rica&quot;              
+##   [7] &quot;Austria&quot;                  &quot;Ireland&quot;                 
+##   [9] &quot;Belgium&quot;                  &quot;Luxembourg&quot;              
+##  [11] &quot;Chile&quot;                    &quot;Czech Republic&quot;          
+##  [13] &quot;Argentina&quot;                &quot;Malta&quot;                   
+##  [15] &quot;Uruguay&quot;                  &quot;Guatemala&quot;               
+##  [17] &quot;Panama&quot;                   &quot;Spain&quot;                   
+##  [19] &quot;Qatar&quot;                    &quot;Saudi Arabia&quot;            
+##  [21] &quot;Trinidad and Tobago&quot;      &quot;Kuwait&quot;                  
+##  [23] &quot;Slovakia&quot;                 &quot;Bahrain&quot;                 
+##  [25] &quot;Nicaragua&quot;                &quot;Ecuador&quot;                 
+##  [27] &quot;El Salvador&quot;              &quot;Uzbekistan&quot;              
+##  [29] &quot;Belize&quot;                   &quot;Lithuania&quot;               
+##  [31] &quot;Algeria&quot;                  &quot;Latvia&quot;                  
+##  [33] &quot;Moldova&quot;                  &quot;Romania&quot;                 
+##  [35] &quot;Bolivia&quot;                  &quot;Turkmenistan&quot;            
+##  [37] &quot;Kazakhstan&quot;               &quot;North Cyprus&quot;            
+##  [39] &quot;Slovenia&quot;                 &quot;Peru&quot;                    
+##  [41] &quot;Mauritius&quot;                &quot;Cyprus&quot;                  
+##  [43] &quot;Belarus&quot;                  &quot;Libya&quot;                   
+##  [45] &quot;Turkey&quot;                   &quot;Paraguay&quot;                
+##  [47] &quot;Serbia&quot;                   &quot;Jordan&quot;                  
+##  [49] &quot;Jamaica&quot;                  &quot;Croatia&quot;                 
+##  [51] &quot;Kosovo&quot;                   &quot;Venezuela&quot;               
+##  [53] &quot;Montenegro&quot;               &quot;Morocco&quot;                 
+##  [55] &quot;Azerbaijan&quot;               &quot;Dominican Republic&quot;      
+##  [57] &quot;Greece&quot;                   &quot;Lebanon&quot;                 
+##  [59] &quot;Portugal&quot;                 &quot;Bosnia and Herzegovina&quot;  
+##  [61] &quot;Honduras&quot;                 &quot;Macedonia&quot;               
+##  [63] &quot;Somalia&quot;                  &quot;Tajikistan&quot;              
+##  [65] &quot;Bhutan&quot;                   &quot;Kyrgyzstan&quot;              
+##  [67] &quot;Mongolia&quot;                 &quot;South Africa&quot;            
+##  [69] &quot;Tunisia&quot;                  &quot;Palestinian Territories&quot; 
+##  [71] &quot;Egypt&quot;                    &quot;Bulgaria&quot;                
+##  [73] &quot;Sierra Leone&quot;             &quot;Cameroon&quot;                
+##  [75] &quot;Iran&quot;                     &quot;Albania&quot;                 
+##  [77] &quot;Namibia&quot;                  &quot;Kenya&quot;                   
+##  [79] &quot;Mozambique&quot;               &quot;Senegal&quot;                 
+##  [81] &quot;Zambia&quot;                   &quot;Iraq&quot;                    
+##  [83] &quot;Gabon&quot;                    &quot;Ethiopia&quot;                
+##  [85] &quot;Sri Lanka&quot;                &quot;Armenia&quot;                 
+##  [87] &quot;Mauritania&quot;               &quot;Congo (Brazzaville)&quot;     
+##  [89] &quot;Georgia&quot;                  &quot;Congo (Kinshasa)&quot;        
+##  [91] &quot;Mali&quot;                     &quot;Ivory Coast&quot;             
+##  [93] &quot;Sudan&quot;                    &quot;Uganda&quot;                  
+##  [95] &quot;Burkina Faso&quot;             &quot;Niger&quot;                   
+##  [97] &quot;Malawi&quot;                   &quot;Chad&quot;                    
+##  [99] &quot;Zimbabwe&quot;                 &quot;Lesotho&quot;                 
+## [101] &quot;Angola&quot;                   &quot;Afghanistan&quot;             
+## [103] &quot;Botswana&quot;                 &quot;Benin&quot;                   
+## [105] &quot;Madagascar&quot;               &quot;Haiti&quot;                   
+## [107] &quot;Yemen&quot;                    &quot;South Sudan&quot;             
+## [109] &quot;Liberia&quot;                  &quot;Guinea&quot;                  
+## [111] &quot;Togo&quot;                     &quot;Rwanda&quot;                  
+## [113] &quot;Syria&quot;                    &quot;Tanzania&quot;                
+## [115] &quot;Burundi&quot;                  &quot;Central African Republic&quot;</code></pre>
+<pre class="r"><code>#joining ramen and happy datasets
+ramen_happy &lt;- left_join(ramen,happy, by=&quot;country&quot;)
+
+#checking to see how many NAs there are
+ramen_happy%&gt;% summarize_all(function(x)sum(is.na(x)))</code></pre>
+<pre><code>## # A tibble: 1 x 15
+##   review_number brand variety country style stars Happiness.Rank Happiness.Score
+##           &lt;int&gt; &lt;int&gt;   &lt;int&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;          &lt;int&gt;           &lt;int&gt;
+## 1             0     0       0       0     0     0              4               4
+## # … with 7 more variables: Economy..GDP.per.Capita. &lt;int&gt;, Family &lt;int&gt;,
+## #   Health..Life.Expectancy. &lt;int&gt;, Freedom &lt;int&gt;, Generosity &lt;int&gt;,
+## #   Trust..Government.Corruption. &lt;int&gt;, Dystopia.Residual &lt;int&gt;</code></pre>
+<pre class="r"><code>#removing the rows without a happiness score
+ramen_happy &lt;- ramen_happy %&gt;% na.omit</code></pre>
+<pre class="r"><code>#creating a new column for continent
+ramen_happy %&gt;% summarize_all(n_distinct)</code></pre>
+<pre><code>## # A tibble: 1 x 15
+##   review_number brand variety country style stars Happiness.Rank Happiness.Score
+##           &lt;int&gt; &lt;int&gt;   &lt;int&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;          &lt;int&gt;           &lt;int&gt;
+## 1          3159   453    2954      39     9    39             39              37
+## # … with 7 more variables: Economy..GDP.per.Capita. &lt;int&gt;, Family &lt;int&gt;,
+## #   Health..Life.Expectancy. &lt;int&gt;, Freedom &lt;int&gt;, Generosity &lt;int&gt;,
+## #   Trust..Government.Corruption. &lt;int&gt;, Dystopia.Residual &lt;int&gt;</code></pre>
+<pre class="r"><code>list(ramen_happy$country%&gt;%unique)</code></pre>
+<pre><code>## [[1]]
+##  [1] &quot;Thailand&quot;             &quot;Japan&quot;                &quot;France&quot;              
+##  [4] &quot;Taiwan&quot;               &quot;United States&quot;        &quot;South Korea&quot;         
+##  [7] &quot;Hong Kong&quot;            &quot;Malaysia&quot;             &quot;China&quot;               
+## [10] &quot;Philippines&quot;          &quot;Brazil&quot;               &quot;Australia&quot;           
+## [13] &quot;Vietnam&quot;              &quot;Mexico&quot;               &quot;Canada&quot;              
+## [16] &quot;Bangladesh&quot;           &quot;New Zealand&quot;          &quot;Singapore&quot;           
+## [19] &quot;Indonesia&quot;            &quot;Ukraine&quot;              &quot;Russia&quot;              
+## [22] &quot;Netherlands&quot;          &quot;Italy&quot;                &quot;Poland&quot;              
+## [25] &quot;Germany&quot;              &quot;India&quot;                &quot;Nigeria&quot;             
+## [28] &quot;Ghana&quot;                &quot;Hungary&quot;              &quot;Pakistan&quot;            
+## [31] &quot;Nepal&quot;                &quot;UK&quot;                   &quot;Myanmar&quot;             
+## [34] &quot;Cambodia&quot;             &quot;Finland&quot;              &quot;Sweden&quot;              
+## [37] &quot;Colombia&quot;             &quot;Estonia&quot;              &quot;United Arab Emirates&quot;</code></pre>
+<pre class="r"><code>ramen_happy$Continent &lt;- NA
+
+ramen_happy$Continent[which(ramen_happy$country %in% c(&quot;Thailand&quot;, &quot;Japan&quot;, &quot;Taiwan&quot;, &quot;South Korea&quot;, &quot;Hong Kong&quot;, &quot;Malaysia&quot;, &quot;China&quot;, &quot;Philippines&quot;, &quot;Vietnam&quot;, &quot;Bangladesh&quot;, &quot;Singapore&quot;, &quot;India&quot;, &quot;Indonesia&quot;, &quot;Pakistan&quot;, &quot;Nepal&quot;, &quot;Myanmar&quot;, &quot;Cambodia&quot;, &quot;United Arab Emirates&quot;))] &lt;- &quot;Asia&quot;
+
+ramen_happy$Continent[which(ramen_happy$country %in% c(&quot;France&quot;, &quot;Ukraine&quot;, &quot;Russia&quot;, &quot;Netherlands&quot;, &quot;Italy&quot;, &quot;Poland&quot;, &quot;Germany&quot;, &quot;Hungary&quot;, &quot;UK&quot;, &quot;Finland&quot;,&quot;Sweden&quot;, &quot;Estonia&quot;))] &lt;- &quot;Europe&quot;
+
+ramen_happy$Continent[which(ramen_happy$country %in% c(&quot;United States&quot;, &quot;Canada&quot;, &quot;Mexico&quot;))] &lt;- &quot;North America&quot;
+
+ramen_happy$Continent[which(ramen_happy$country %in% c(&quot;Australia&quot;, &quot;New Zealand&quot;))] &lt;- &quot;Australia&quot;
+
+ramen_happy$Continent[which(ramen_happy$country %in% c(&quot;Nigeria&quot;, &quot;Ghana&quot;))] &lt;- &quot;Africa&quot;
+
+ramen_happy$Continent[which(ramen_happy$country %in% c(&quot;Brazil&quot;, &quot;Colombia&quot;))] &lt;- &quot;South America&quot;
+
+ramen_happy %&gt;% summarize_all(function(x)sum(is.na(x)))</code></pre>
+<pre><code>## # A tibble: 1 x 16
+##   review_number brand variety country style stars Happiness.Rank Happiness.Score
+##           &lt;int&gt; &lt;int&gt;   &lt;int&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;          &lt;int&gt;           &lt;int&gt;
+## 1             0     0       0       0     0     0              0               0
+## # … with 8 more variables: Economy..GDP.per.Capita. &lt;int&gt;, Family &lt;int&gt;,
+## #   Health..Life.Expectancy. &lt;int&gt;, Freedom &lt;int&gt;, Generosity &lt;int&gt;,
+## #   Trust..Government.Corruption. &lt;int&gt;, Dystopia.Residual &lt;int&gt;,
+## #   Continent &lt;int&gt;</code></pre>
+<p>#Wrangling
+####In this dataset, there are 453 distinct brands of ramen and 2,954 different varieties from 39 distinct countries. The most common style of ramen rated is in a pack with 1,813 different ratings. The second most common is bowl ramen with 612 ratings, followed by cup ramen with 559 ratings. Out of all of the different styles, ramen in a bar has the highest average rating with 5.0 stars, followed by box ramen with 4.21 stars. The most common brand of ramen rated is Nissin with 443 ramen ratings, followed by Nongshim, and the Maruchan. The continent with the highest mean ramen rating is South America with 3.79 stars while the country with the highest mean ramen rating is Cambodia with 4.2 stars. The brand with the highest average rating is Best Wok with a rating of 5.0. Looking at average happiness scores in decreasing order, continents are ordered Australia, North America, Europe, South America, Asia, and Africa last. Within this merged ramen and happiness dataset, the top 5 happiest countries are Finland, Netherlands, Canada, New Zealand, and Australia, respectively. The United States is ranked 7th. Because ramen is considered an Asian dish, I was interested to see what were the most commonly rated brands in Asia. I found that Nissin was the most commonly rated brand from Asia. And since ramen was actually invented in Japan, I was interested to see what the highest rated brand in Japan was. I found it to be a tie for 5.0 stars between Fukumen, Higashi, Kimura, MyKuali, Seven &amp; I, Takamori, and Torishi. Packaged ramen sometimes gets a bad rap for being unhealthy and full of MSG. I wanted to see how much health life expectancy factored into overall happiness. For this, I created a new column that was a function of two other columns to obtain the percent health life expectancy played into overall happiness. I found that health life expectancy played 15.4% into the overall happiness score in Japan while health life expectancy played 11.01% into the overall happiness score in the United States.</p>
+<pre class="r"><code>#determining which ramen brand has the overall highest average rating 
+ramen_happy %&gt;% group_by(brand) %&gt;% 
+  summarize(mean_rating=mean(stars, na.rm = T)) %&gt;% 
+  slice(which.max(mean_rating))</code></pre>
+<pre><code>## # A tibble: 1 x 2
+##   brand    mean_rating
+##   &lt;chr&gt;          &lt;dbl&gt;
+## 1 Best Wok           5</code></pre>
+<pre class="r"><code>#determining which country has the highest average ramen rating 
+ramen_happy %&gt;% group_by(country) %&gt;% 
+  summarize(mean_rating=mean(stars, na.rm = T)) %&gt;% 
+  slice(which.max(mean_rating))</code></pre>
+<pre><code>## # A tibble: 1 x 2
+##   country  mean_rating
+##   &lt;chr&gt;          &lt;dbl&gt;
+## 1 Cambodia         4.2</code></pre>
+<pre class="r"><code>#determining average ramen rating by continent
+ramen_happy %&gt;% group_by(Continent) %&gt;% summarize(mean_ramen=mean(stars, na.orm=T)) </code></pre>
+<pre><code>## # A tibble: 6 x 2
+##   Continent     mean_ramen
+##   &lt;chr&gt;              &lt;dbl&gt;
+## 1 Africa              2.94
+## 2 Asia                3.78
+## 3 Australia           3.25
+## 4 Europe              3.18
+## 5 North America       3.38
+## 6 South America       3.79</code></pre>
+<pre class="r"><code>#determining which continent has the highest average ramen rating
+ramen_happy %&gt;% group_by(Continent) %&gt;% 
+  summarize(mean_rating=mean(stars, na.rm = T)) %&gt;% 
+  slice(which.max(mean_rating))</code></pre>
+<pre><code>## # A tibble: 1 x 2
+##   Continent     mean_rating
+##   &lt;chr&gt;               &lt;dbl&gt;
+## 1 South America        3.79</code></pre>
+<pre class="r"><code>#determining the total number of varieties per brand 
+ramen_happy %&gt;% select(brand, variety) %&gt;% group_by(brand) %&gt;% summarize(n=n()) %&gt;%  arrange(desc(n))</code></pre>
+<pre><code>## # A tibble: 453 x 2
+##    brand               n
+##    &lt;chr&gt;           &lt;int&gt;
+##  1 Nissin            443
+##  2 Nongshim          110
+##  3 Maruchan          106
+##  4 Myojo              90
+##  5 Samyang Foods      81
+##  6 Mama               71
+##  7 Paldo              71
+##  8 Indomie            56
+##  9 Ottogi             47
+## 10 Sapporo Ichiban    44
+## # … with 443 more rows</code></pre>
+<pre class="r"><code>#determining count per style 
+ramen_happy %&gt;% group_by(style) %&gt;% count()</code></pre>
+<pre><code>## # A tibble: 9 x 2
+## # Groups:   style [9]
+##   style          n
+##   &lt;chr&gt;      &lt;int&gt;
+## 1 Bar            1
+## 2 Bowl         612
+## 3 Box           32
+## 4 Can            1
+## 5 Cup          559
+## 6 NA             2
+## 7 Pack        1813
+## 8 Restaurant     3
+## 9 Tray         138</code></pre>
+<pre class="r"><code>#determining which style of ramen has the overall highest average rating 
+ramen_happy %&gt;% group_by(style) %&gt;%  summarize(mean_rating=mean(stars, na.rm = T)) %&gt;% 
+  arrange(desc(mean_rating))</code></pre>
+<pre><code>## # A tibble: 9 x 2
+##   style      mean_rating
+##   &lt;chr&gt;            &lt;dbl&gt;
+## 1 Bar               5   
+## 2 Box               4.21
+## 3 Pack              3.74
+## 4 Bowl              3.71
+## 5 Tray              3.60
+## 6 Restaurant        3.58
+## 7 Can               3.5 
+## 8 Cup               3.49
+## 9 NA                3.38</code></pre>
+<pre class="r"><code>#determining which country has the highest happiness score 
+happy_country &lt;- ramen_happy%&gt;% select(country, stars, Happiness.Score) %&gt;% arrange(desc(Happiness.Score))
+  
+happy_country %&gt;% group_by(country) %&gt;% summarize(mean_happy=mean(Happiness.Score, na.rm = T)) %&gt;% arrange(desc(mean_happy))</code></pre>
+<pre><code>## # A tibble: 39 x 2
+##    country              mean_happy
+##    &lt;chr&gt;                     &lt;dbl&gt;
+##  1 Finland                    7.47
+##  2 Netherlands                7.38
+##  3 Canada                     7.32
+##  4 New Zealand                7.31
+##  5 Australia                  7.28
+##  6 Sweden                     7.28
+##  7 United States              6.99
+##  8 Germany                    6.95
+##  9 UK                         6.71
+## 10 United Arab Emirates       6.65
+## # … with 29 more rows</code></pre>
+<pre class="r"><code>#determining which continent has the highest happiness score
+ramen_happy %&gt;% group_by(Continent) %&gt;% 
+  summarize(mean_happy=mean(Happiness.Score, na.rm = T)) %&gt;% arrange(desc(mean_happy))</code></pre>
+<pre><code>## # A tibble: 6 x 2
+##   Continent     mean_happy
+##   &lt;chr&gt;              &lt;dbl&gt;
+## 1 Australia           7.29
+## 2 North America       7.00
+## 3 Europe              6.66
+## 4 South America       6.54
+## 5 Asia                5.84
+## 6 Africa              4.60</code></pre>
+<pre class="r"><code>#determining the most common brand in Asia
+ramen_happy%&gt;% filter(Continent==&quot;Asia&quot;) %&gt;% group_by(brand) %&gt;% count() %&gt;% arrange(desc(n))</code></pre>
+<pre><code>## # A tibble: 345 x 2
+## # Groups:   brand [345]
+##    brand             n
+##    &lt;chr&gt;         &lt;int&gt;
+##  1 Nissin          281
+##  2 Myojo            82
+##  3 Samyang Foods    81
+##  4 Mama             71
+##  5 Paldo            71
+##  6 Nongshim         70
+##  7 Indomie          54
+##  8 Maruchan         48
+##  9 Ottogi           43
+## 10 Acecook          37
+## # … with 335 more rows</code></pre>
+<pre class="r"><code>#determining highest rated brand in Japan
+ramen_happy%&gt;% filter(country==&quot;Japan&quot;) %&gt;% 
+  group_by(brand) %&gt;% 
+  summarize(mean_rating=mean(stars, na.rm = T)) %&gt;% 
+  arrange(desc(mean_rating))</code></pre>
+<pre><code>## # A tibble: 73 x 2
+##    brand        mean_rating
+##    &lt;chr&gt;              &lt;dbl&gt;
+##  1 Fukumen             5   
+##  2 Higashi             5   
+##  3 Kimura              5   
+##  4 MyKuali             5   
+##  5 Seven &amp; I           5   
+##  6 Takamori            5   
+##  7 Torishi             5   
+##  8 Island Foods        4.8 
+##  9 Ogasawara           4.75
+## 10 Yamamori            4.62
+## # … with 63 more rows</code></pre>
+<pre class="r"><code>#counting number of varieties within different brands in Japan
+ramen_happy%&gt;% filter(country==&quot;Japan&quot;) %&gt;% 
+  group_by(brand) %&gt;% count()</code></pre>
+<pre><code>## # A tibble: 73 x 2
+## # Groups:   brand [73]
+##    brand           n
+##    &lt;chr&gt;       &lt;int&gt;
+##  1 Acecook        36
+##  2 Ajinatori       2
+##  3 Daikoku        13
+##  4 Daraz           1
+##  5 Fuji Mengyo     1
+##  6 Fujiwara        7
+##  7 Fukumen         1
+##  8 Goku Uma        3
+##  9 Higashi         1
+## 10 Higashimaru     1
+## # … with 63 more rows</code></pre>
+<pre class="r"><code>#determining how much health life expectancy plays into overall happiness score on average in each continent 
+
+ramen_happy &lt;- ramen_happy%&gt;%mutate(Life_Happy=(Health..Life.Expectancy./Happiness.Score)*100)</code></pre>
+<p>###Visualization
+####For the first plot, I decided to plot average happiness score against average ramen rating and fill by continent. I was hoping to see that a higher ramen score was associated with a higher ramen score. However, this was not exactly the case as I cannot gather a clear association between average ramen rating and happiness score from this plot. It is true that Africa has the lowest average ramen rating and the lowest average happiness score. However, Australia has the highest happiness score, but only a mediocre average ramen rating. Asia and South America have very similar average ramen ratings, but South America has over a 0.5 increase in average happiness score than Asia. While I had initially hoped to find some association, I realize that there are many more factors that affect continental happiness than ramen, so it is not surprising to not find a clear association between these two variables.</p>
+<pre class="r"><code>ramen_happy %&gt;% group_by(Continent) %&gt;% summarize(mean_ramen=mean(stars, na.orm=T), mean_happy=mean(Happiness.Score, na.rm = T)) %&gt;% ggplot(aes(mean_ramen, mean_happy, color=Continent)) + geom_point(size=4) + ggtitle(&quot;Average Happiness and Ramen Rating Across Continents&quot;) + xlab(&quot;Average Ramen Rating&quot;) + ylab(&quot;Average Happiness Score&quot;) +scale_x_continuous(lim=c(2.5,4)) + scale_y_continuous(lim=c(4,8)) + theme_minimal() </code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>####For the second plot, I plotted average rating by style of ramen across continent of origin. Some continents did not have every type of ramen due to surveying purposes (lack of data within the ramen dataset). For example, Africa only had ramen in a pack. I was most interested in Asia and North America because they seemed to have the most variety of styles of ramen rated. In Asia, ramen in a box seemed to have the highest average rating, followed by ramen in a pack. Overall, all ramen from Asia appeared to have an average rating greater than 3 stars. In North America, ramen in a bar appeared to have the highest average rating. Ramen in a box appeared to have the lowest rating, and all the rest of the styles had about the same rating. In Australia, ramen in a bowl appeared to have a significantly higher average rating than the other styles. In South America and Europe, of all the styles rated, they all seemed to have similar ratings within their respective continents.</p>
+<pre class="r"><code>ramen_happy %&gt;% group_by(Continent, style) %&gt;% summarize(mean_rating=mean(stars,na.rm=T)) %&gt;% ggplot(aes(style, mean_rating, fill=style)) + geom_bar(stat=&quot;summary&quot;) + ggtitle(&quot;Average rating by Style across Continent of Origin&quot;) + xlab(&quot;Style&quot;) + ylab(&quot;Average rating&quot;) + facet_wrap(~Continent) + theme(axis.text.x=element_text(angle=45, hjust=1)) </code></pre>
+<pre><code>## No summary function supplied, defaulting to `mean_se()
+## No summary function supplied, defaulting to `mean_se()
+## No summary function supplied, defaulting to `mean_se()
+## No summary function supplied, defaulting to `mean_se()
+## No summary function supplied, defaulting to `mean_se()
+## No summary function supplied, defaulting to `mean_se()</code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-19-1.png" width="672" />
+#Dimensionality Reduction - PCA
+####I plotted the proportion of variance explained by each principal component from the largest eigen value to the smallest. I found that the first PC only accounts for 38% of the variance. The first two PCs account for 63% of the variance. The first three PCs account for 83% of the variance. Because one of the ways to distinguish how many PCs to keep is how many accounts for at least 80% of the variance, it appears that the first three PCs is an acceptable number to keep.</p>
+<pre class="r"><code>happy1 &lt;- ramen_happy %&gt;% select(Happiness.Score, Health..Life.Expectancy., Family, Economy..GDP.per.Capita., Freedom, Generosity, Trust..Government.Corruption., Dystopia.Residual)
+happy_numeric &lt;- happy1 %&gt;% select_if(is.numeric) %&gt;% scale
+rownames(happy_numeric) &lt;- happy1$Name</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: &#39;Name&#39;.</code></pre>
+<pre class="r"><code>happy_pca &lt;- princomp(happy_numeric)
+names(happy_pca)</code></pre>
+<pre><code>## [1] &quot;sdev&quot;     &quot;loadings&quot; &quot;center&quot;   &quot;scale&quot;    &quot;n.obs&quot;    &quot;scores&quot;   &quot;call&quot;</code></pre>
+<pre class="r"><code>summary(happy_pca, loadings=T)</code></pre>
+<pre><code>## Importance of components:
+##                           Comp.1    Comp.2    Comp.3     Comp.4     Comp.5
+## Standard deviation     1.7496951 1.4012212 1.2665115 0.85876633 0.65953625
+## Proportion of Variance 0.3828002 0.2455053 0.2005699 0.09221412 0.05439071
+## Cumulative Proportion  0.3828002 0.6283055 0.8288754 0.92108950 0.97548022
+##                            Comp.6      Comp.7       Comp.8
+## Standard deviation     0.34174519 0.281613801 2.948077e-04
+## Proportion of Variance 0.01460334 0.009916429 1.086739e-08
+## Cumulative Proportion  0.99008356 0.999999989 1.000000e+00
+## 
+## Loadings:
+##                               Comp.1 Comp.2 Comp.3 Comp.4 Comp.5 Comp.6 Comp.7
+## Happiness.Score                0.441  0.376  0.264         0.179              
+## Health..Life.Expectancy.       0.405 -0.440  0.191        -0.111  0.439  0.611
+## Family                         0.424  0.280        -0.387 -0.579 -0.460  0.105
+## Economy..GDP.per.Capita.       0.502 -0.129  0.264  0.232         0.173 -0.703
+## Freedom                        0.184  0.232 -0.604 -0.446  0.250  0.502 -0.145
+## Generosity                            0.499 -0.257  0.704 -0.239  0.213  0.223
+## Trust..Government.Corruption.  0.416 -0.189 -0.337  0.255  0.563 -0.509  0.148
+## Dystopia.Residual                     0.481  0.520 -0.185  0.422         0.160
+##                               Comp.8
+## Happiness.Score                0.742
+## Health..Life.Expectancy.      -0.161
+## Family                        -0.161
+## Economy..GDP.per.Capita.      -0.280
+## Freedom                       -0.114
+## Generosity                    -0.187
+## Trust..Government.Corruption. -0.121
+## Dystopia.Residual             -0.508</code></pre>
+<pre class="r"><code>eigval_happy &lt;- happy_pca$sdev^2
+varprop_happy = round(eigval_happy/sum(eigval_happy), 2)
+
+ggplot() + geom_bar(aes(y=varprop_happy, x=1:8), stat = &quot;identity&quot;) + xlab(&quot;&quot;) + geom_path(aes(y=varprop_happy, x=1:8)) + geom_text(aes(x=1:8, y=varprop_happy, label=round(varprop_happy, 2)), vjust=1, col=&quot;white&quot;, size=5) + scale_y_continuous(breaks=seq(0,.6,.2), labels=scales::percent) + scale_x_continuous(breaks=1:10)</code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<pre class="r"><code>round(cumsum(eigval_happy)/sum(eigval_happy), 2)</code></pre>
+<pre><code>## Comp.1 Comp.2 Comp.3 Comp.4 Comp.5 Comp.6 Comp.7 Comp.8 
+##   0.38   0.63   0.83   0.92   0.98   0.99   1.00   1.00</code></pre>
+<pre class="r"><code>eigval_happy</code></pre>
+<pre><code>##       Comp.1       Comp.2       Comp.3       Comp.4       Comp.5       Comp.6 
+## 3.061433e+00 1.963421e+00 1.604051e+00 7.374796e-01 4.349881e-01 1.167898e-01 
+##       Comp.7       Comp.8 
+## 7.930633e-02 8.691158e-08</code></pre>
+<pre class="r"><code>#plotting scores to show happy data with respect to the first 2 PC&#39;s
+ggplot() + geom_point(aes(happy_pca$scores[,1], happy_pca$scores[,2] )) +xlab(&quot;PC1&quot;) + ylab(&quot;PC2&quot;) + ggtitle(&quot;PC1 vs PC2&quot;) </code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p>#For PC1 and PC2, I made a plot of the loadings. All of the vectors were pointing in a similar direction with the exception of the dystopia residual. The trust in the government and economy per gdp vectors had a small angle between them, which means that they are higher correlated. The family and freedom vectors made small angles with the happiness score, which implies that family and freedom are more highly correlated with overall happiness score. PC1 represents overall happiness score while PC2 represents health life expectancy. When graphing the first PC against the second PC (colored by continent), it is hard to see differences among factors related to happiness score on the first two PCs. There is not a clear separation or correlation. Because PC1 through PC3 represented over 80% of the variability, I decided to plot PC2 against PC3. When looking at the plot of the loading scores, the vectors are pointing in all different directions meaning that they have low correlations between one another. The smallest angle between vectors (meaning highest correlation) appears to be between family and generosity. When making a scatter plot of PC2 and PC3, it is still difficult to see differnces among PC2 and PC3. There is not a clear separation or correlation between health life expectancy and family. The principal component analysis did not yield clear information about correlations between different factors or how such factors may contribute to overall happiness, meaning that it is inconclusive.</p>
+<pre class="r"><code>library(tidyverse)
+
+#looking at PC1 and PC2
+
+happy_pca2 &lt;- happy_numeric %&gt;% scale() %&gt;% prcomp() 
+names(happy_pca2)</code></pre>
+<pre><code>## [1] &quot;sdev&quot;     &quot;rotation&quot; &quot;center&quot;   &quot;scale&quot;    &quot;x&quot;</code></pre>
+<pre class="r"><code>happy_pca2$rotation[,1:2]%&gt;%as.data.frame%&gt;%rownames_to_column%&gt;%
+ggplot()+geom_hline(aes(yintercept=0),lty=2)+
+geom_vline(aes(xintercept=0),lty=2)+ylab(&quot;PC2&quot;)+xlab(&quot;PC1&quot;)+
+geom_segment(aes(x=0,y=0,xend=PC1,yend=PC2),arrow=arrow(),col=&quot;red&quot;)+
+geom_label(aes(x=PC1*1.1,y=PC2*1.1,label=rowname)) + ggtitle(&quot;Plot of Loading Scores of PC1 vs PC2&quot;) </code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<pre class="r"><code>happy_pca2$x%&gt;%as.data.frame%&gt;%mutate(Continent=ramen_happy$Continent)%&gt;%ggplot(aes(PC1,PC2,col=Continent))+geom_point() + ggtitle(&quot;Principal Component Plot of Average Happiness Score against Life Expectancy&quot;) </code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-23-2.png" width="672" /></p>
+<pre class="r"><code>happy_pca2$rotation[,2:3]%&gt;%as.data.frame%&gt;%rownames_to_column%&gt;%
+ggplot()+geom_hline(aes(yintercept=0),lty=3)+
+geom_vline(aes(xintercept=0),lty=3)+ylab(&quot;PC2&quot;)+xlab(&quot;PC3&quot;)+
+geom_segment(aes(x=0,y=0,xend=PC2,yend=PC3),arrow=arrow(),col=&quot;red&quot;)+
+geom_label(aes(x=PC2*1.1,y=PC3*1.1,label=rowname)) + ggtitle(&quot;Plot of Loading Scores of PC2 v PC3&quot;) </code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<pre class="r"><code>happy_pca2$x%&gt;%as.data.frame%&gt;%mutate(Continent=ramen_happy$Continent)%&gt;%ggplot(aes(PC2,PC3,col=Continent))+geom_point() + ggtitle(&quot;Principle Component Plot of Life Expectancy and Family&quot;) </code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-24-2.png" width="672" /></p>

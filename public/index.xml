@@ -17,7 +17,16 @@
       <pubDate>Mon, 09 Dec 2019 00:00:00 +0000</pubDate>
       
       <guid>/blog/graduation/</guid>
-      <description>#In less than 5 days I will be officially finsihed with college! It feels like just yesterday I was sitting for the first time in my introductory general chemistry course in a lecture hall with more students in it than my entire high school graduating class. Three and a half years later I can say that I’ve learned quite a bit academically and about myself. Next semester I plan to work and travel before starting dental school in August!</description>
+      <description>In less than 5 days I will be officially finsihed with college! It feels like just yesterday I was sitting for the first time in my introductory general chemistry course in a lecture hall with more students in it than my entire high school graduating class. Three and a half years later I can say that I’ve learned quite a bit academically and about myself. Next semester I plan to work and travel before starting dental school in August!</description>
+    </item>
+    
+    <item>
+      <title>Introduction to Python</title>
+      <link>/blog/introduction-to-python/</link>
+      <pubDate>Mon, 09 Dec 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/introduction-to-python/</guid>
+      <description></description>
     </item>
     
     <item>
@@ -26,7 +35,28 @@
       <pubDate>Sun, 02 Oct 2016 22:55:05 -0400</pubDate>
       
       <guid>/projects/</guid>
-      <description></description>
+      <description>Projects Here are some projects I have been working on:
+  Project 1
+  Project 2
+  </description>
+    </item>
+    
+    <item>
+      <title>EDA Project</title>
+      <link>/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project1/</guid>
+      <description>###Sydney Pham #Introduction ####The first dataset I decided to use contains ramen ratings for over 3,000 different types of ramen from across the world. Originally titled “ramen_ratings”, I acquired this dataset from tidytuesday on Github. This dataset was created by Hans Lienesch, a man who has dedicated his life to eating and rating ramen. Each entry contains a review number, the brand of ramen, the variety of ramen, country of origin, packaging style, and rating on a continuous scale of 0.</description>
+    </item>
+    
+    <item>
+      <title>Project 2: Modeling, Testing, and Predicting</title>
+      <link>/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project2/</guid>
+      <description>###Sydney Pham #Introduction ####For this project, I chose a dataset exploring various factors that may predict the onset of heart disease. I obtained the dataset from the website Kaggle, but the data itself was compiled from various doctors from around the world including Switzerland, Budapest, Cleveland and Long Beach. There are a total of 14 variables in the dataset, but I decided to keep the following eight: 1) age of the patient, 2) sex (0=female, 1=male), 3) cp - chest pain type experienced (0=typical angina, 1= atypical angina, 2=non-anginal pain, 3=asyptomatic), 4) chol - the patient’s cholesterol measurement in mg/dl, 5) exang - exercise induced angina ( 0=no, 1=yes), 6) oldpeak - ST depression induced by exercise relative to rest, 7) ca - the number of major vessels by fluoroscopy (0-3), 8) target - heart state (0=healthy, 1=heart disease).</description>
     </item>
     
   </channel>

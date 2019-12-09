@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Sydney Pham" />
+    <meta name="description" content="Describe your website">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title>Project 2: Modeling, Testing, and Predicting</title>
+    <meta name="generator" content="Hugo 0.60.1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/blog/">BLOG</a></li>
+        
+        <li><a href="/projects/">PROJECTS</a></li>
+        
+        <li><a href="/spresume.pdf">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/project2/">Project 2: Modeling, Testing, and Predicting</a></strong>
+          </h3>
+        </div>
+        <div class="blog-title">
+          <h4>
+          January 1, 0001
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<p>###Sydney Pham
+#Introduction
+####For this project, I chose a dataset exploring various factors that may predict the onset of heart disease. I obtained the dataset from the website Kaggle, but the data itself was compiled from various doctors from around the world including Switzerland, Budapest, Cleveland and Long Beach. There are a total of 14 variables in the dataset, but I decided to keep the following eight: 1) <em>age</em> of the patient, 2) <em>sex</em> (0=female, 1=male), 3) <em>cp</em> - chest pain type experienced (0=typical angina, 1= atypical angina, 2=non-anginal pain, 3=asyptomatic), 4) <em>chol</em> - the patient’s cholesterol measurement in mg/dl, 5) <em>exang</em> - exercise induced angina ( 0=no, 1=yes), 6) <em>oldpeak</em> - ST depression induced by exercise relative to rest, 7) <em>ca</em> - the number of major vessels by fluoroscopy (0-3), 8) <em>target</em> - heart state (0=healthy, 1=heart disease). ST depression refers to the depression of the ST wave segment on an electrocardiogram below baseline. ST depression can be used as a predictor of myocaridal ischemia, or lack of blood flow to the heart which can result in a heart attack.</p>
+<pre class="r"><code>#install.packages(&quot;tidyr&quot;)
+library(tidyverse)</code></pre>
+<pre><code>## ── Attaching packages ─────────── tidyverse 1.3.0 ──</code></pre>
+<pre><code>## ✔ ggplot2 3.2.1     ✔ purrr   0.3.3
+## ✔ tibble  2.1.3     ✔ dplyr   0.8.3
+## ✔ tidyr   1.0.0     ✔ stringr 1.4.0
+## ✔ readr   1.3.1     ✔ forcats 0.4.0</code></pre>
+<pre><code>## ── Conflicts ────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(dplyr)
+library(ggplot2)
+heart = read.csv(&quot;heart.csv&quot;)
+#removing unwanted columns
+heart_dat &lt;- heart %&gt;% select(-c(&quot;trestbps&quot;, &quot;fbs&quot;, &quot;restecg&quot;, &quot;thalach&quot;, &quot;slope&quot;, &quot;thal&quot;))</code></pre>
+<p>#MANOVA
+####With a MANOVA, I will simultaneously test whether ST wave depression (oldpeak), cholesterol measurement, and age differ by heart state (healthy (0) vs. heart disease present (1)). The null hypothesis is that for each numeric response variable (oldpeak, chol, and age), there is not a mean difference across target heart state. Examination of the bivariate density plots revealed that the data did not meet multivariate normality. Because there are many assumptions for a MANOVA, it is generally hard to test or meet, and it is likely that many were not met in this situation. Regarldess, the test was run. After running the MANOVA, it was observed that there is in fact a significant difference in ST wave depression, cholesterol levels, and age across target heart state, Pillai trace=0.206, pseudo F (3,299)=25.816, p=7.047e-15 &lt; 0.001. Univariate ANOVAs for each numeric variable were performed. The univariate ANOVA for cholesterol was not significant (p=0.1388). However, the univariate ANOVA for oldpeak was significant (F(1,301)=68.551, p=4.085e-15 &lt; 0.001), and the univariate ANOVA for age was also significant (F(1,301)=16.117,p=7.525e-05 &lt; 0.001). Post hoc analysis was performed by conducting pairwise comparisons to determine which target heart state differed in age, cholesterol, and oldpeak. It revealed that age and ST wave depression differ, but not cholesterol. However, in reality the pot hoc t tests were unecessary since I had one MANOVA with three numeric response variables and a categorical predictor with 2 levels. The univariate ANOVAs indicated which variables were significantly different. Thus,a total of four tests were conducted.Because of this, the probability of at least one type I error is 0.1855. Therefore, the Bonferoni adjustment would be 0.05/4=0.0125. Even with the Bonferroni adjustment, only the ST wave depression (oldpeak) and age remain sigificantly different across target heart state.</p>
+<pre class="r"><code>#MANOVA
+man1 &lt;- manova(cbind(oldpeak,chol, age) ~ target, data = heart_dat)
+summary(man1)</code></pre>
+<pre><code>##            Df  Pillai approx F num Df den Df    Pr(&gt;F)    
+## target      1 0.20573   25.816      3    299 7.047e-15 ***
+## Residuals 301                                             
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>#Univariate ANOVAs
+summary.aov(man1)</code></pre>
+<pre><code>##  Response oldpeak :
+##              Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## target        1  75.52  75.521  68.551 4.085e-15 ***
+## Residuals   301 331.60   1.102                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response chol :
+##              Df Sum Sq Mean Sq F value Pr(&gt;F)
+## target        1   5895  5894.7   2.203 0.1388
+## Residuals   301 805406  2675.8               
+## 
+##  Response age :
+##              Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## target        1   1266 1266.01  16.117 7.525e-05 ***
+## Residuals   301  23644   78.55                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>heart_dat %&gt;% group_by(target) %&gt;% summarize(mean(oldpeak), mean(chol), mean(age))</code></pre>
+<pre><code>## # A tibble: 2 x 4
+##   target `mean(oldpeak)` `mean(chol)` `mean(age)`
+##    &lt;int&gt;           &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt;
+## 1      0           1.59          251.        56.6
+## 2      1           0.583         242.        52.5</code></pre>
+<pre class="r"><code>#Posthoc t tests
+pairwise.t.test(heart_dat$oldpeak, heart_dat$target, p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  heart_dat$oldpeak and heart_dat$target 
+## 
+##   0      
+## 1 4.1e-15
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(heart_dat$chol, heart_dat$target, p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  heart_dat$chol and heart_dat$target 
+## 
+##   0   
+## 1 0.14
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(heart_dat$age, heart_dat$target, p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  heart_dat$age and heart_dat$target 
+## 
+##   0      
+## 1 7.5e-05
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>#multivariate normality
+ggplot(heart_dat, aes(x = chol, y = age)) +   geom_point(alpha = .8) +  facet_wrap(~target) + ggtitle(&quot;Multivariate normaility for age and cholesterol by target&quot;)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code>ggplot(heart_dat, aes(x = chol, y = oldpeak)) +   geom_point(alpha = .8) + facet_wrap(~target) + ggtitle(&quot;Multivariate normaility for oldpeak and cholesterol by target&quot;)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
+<pre class="r"><code>ggplot(heart_dat, aes(x = age, y = oldpeak)) +   geom_point(alpha = .8) + facet_wrap(~target) + ggtitle(&quot;Multivariate normaility for age and oldpeak by target&quot;)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-2-3.png" width="672" /></p>
+<p>#Randomization Test
+####I wanted to test how average ST depression compared across chest pain type. To test this, I used an ANOVA where my null hypothesis was that average ST depression for each chest pain type group was the same. The alternative hypothesis is that at least one of the mean ST depression differs in one chest pain type group from the other chest pain types. To test the null hypothesis, I calculated the F statistic and looked at the variation between groups versus the variation within groups. A histogram of the data was made, and it appears that the data failed to meet the assumption of normal distribution. The sum of squares between (SSB) and sum of squares within (SSW) were computed manually for the randomization test and then were used to calculate the F statistic. The resulting F statistic was 14.273. For comparison, the F statistic was also calculated from the aov() function, and the resulting F statistic from that method was 14.27. Comparing the means of the two, the resulting p value was 1. Based off the one-way ANOVA using the aov(), we observed that there is in fact a difference in average ST wave depression across chest pain types (p=0.00928 &lt; 0.05).</p>
+<pre class="r"><code>heart_dat$cp&lt;-as.factor(heart_dat$cp)
+summary(aov(oldpeak~cp, data=heart_dat))</code></pre>
+<pre><code>##              Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## cp            3   51.0  17.000   14.27 1.02e-08 ***
+## Residuals   299  356.1   1.191                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>obs_F&lt;- 14.27
+
+SSW &lt;- heart_dat %&gt;% group_by(cp) %&gt;% summarize(SSW = sum((oldpeak -mean(oldpeak))^2)) %&gt;% summarize(sum(SSW)) %&gt;% pull
+SSB &lt;- heart_dat %&gt;% mutate(mean = mean(oldpeak)) %&gt;% group_by(cp) %&gt;% mutate(groupmean = mean(oldpeak)) %&gt;% summarize(SSB = sum((mean -groupmean)^2)) %&gt;% summarize(sum(SSB)) %&gt;% pull 
+F_stat &lt;- (SSB/3)/(SSW/299)
+F_stat</code></pre>
+<pre><code>## [1] 14.2731</code></pre>
+<pre class="r"><code>Fs&lt;-replicate(5000,{
+  new&lt;-heart_dat%&gt;%mutate(oldpeak=sample(oldpeak))
+  SSW&lt;- new%&gt;%group_by(cp)%&gt;%summarize(SSW=sum((oldpeak-mean(oldpeak))^2))%&gt;%summarize(sum(SSW))%&gt;%pull
+  SSB&lt;- new%&gt;%mutate(mean=mean(oldpeak))%&gt;%group_by(cp)%&gt;%mutate(groupmean=mean(age))%&gt;%
+    summarize(SSB=sum((mean-groupmean)^2))%&gt;%summarize(sum(SSB))%&gt;%pull
+  (SSB/3)/(SSW/299)
+})
+
+hist(Fs, prob=T); abline(v = obs_F, col=&quot;red&quot;,add=T)</code></pre>
+<pre><code>## Warning in int_abline(a = a, b = b, h = h, v = v, untf = untf, ...): &quot;add&quot; is
+## not a graphical parameter</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code>mean(Fs &gt; obs_F)</code></pre>
+<pre><code>## [1] 1</code></pre>
+<p>#Linear Regression
+####A buildup in cholesterol in arteries can block blood flow and ultimately result in a heart attack. Because of this, I wanted to see how cholesterol levels affect prediction of a heart attack as given by ST depression. I used a linear regression model to predict ST wave depression from cholesterol levels and chest pain type. My null hypothesis is that while controlling for chest pain type, cholesterol does not explain variation in ST wave depression. The other null hypothesis is that while controlling for cholesterol levels, chest pain type does not explain variation in ST wave depression. After running the linear regression and looking at the coefficients, it was observed that while controlling for cholesterol, there is no significant effect of gender on ST wave depression. For every one unit increase in cholesterol, there is at 0.0017mm increase in ST wave depression, t=1.299, df=300,p=0.149. Controlling for gender, there is no significant effect of cholesterol on ST wave depression, t=1.901, df=300, p=0.0583. The interactions between cholesterol levels and gender were studied as well. The slopes for males and females are not signifcantly different (b3=-0.0006, t=-0.238, p=0.8124). The assumptions of linearity, normality, and homoskedaticity are not met as given by graphical representation and the Breuch-Pagan test (p=0.8488). The regression results were recomputed with robust standard error. Even after computing with robust SE, there were no significant changes as all variables and interactions remained insignifcant for both models with and without interaction of cholesterol and sex. There was no significant effect of cholesterol (t=-1.56,p=0.33) or gender(t=1.87, p=0.06),or their interactions(t=-0.21, p=0.83) on ST wave depression. Based off the calculated R^2, the model explains 81.9% of the variation in the outcome.</p>
+<pre class="r"><code>#linear regression without interaction
+fit &lt;- lm(oldpeak ~ chol + sex, data=heart_dat)
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = oldpeak ~ chol + sex, data = heart_dat)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.2783 -0.9624 -0.3167  0.6150  5.4895 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept) 0.431500   0.361993   1.192   0.2342  
+## chol        0.001701   0.001310   1.299   0.1949  
+## sex         0.276866   0.145663   1.901   0.0583 .
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.156 on 300 degrees of freedom
+## Multiple R-squared:  0.01478,    Adjusted R-squared:  0.008207 
+## F-statistic:  2.25 on 2 and 300 DF,  p-value: 0.1072</code></pre>
+<pre class="r"><code>#linear regression with interaction 
+fit2 &lt;- lm(oldpeak ~ chol * sex, data=heart_dat)
+summary(fit2)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = oldpeak ~ chol * sex, data = heart_dat)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.2475 -0.9723 -0.3109  0.6308  5.5188 
+## 
+## Coefficients:
+##               Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept)  0.3526933  0.4914378   0.718    0.474
+## chol         0.0020028  0.0018255   1.097    0.273
+## sex          0.4327073  0.6720687   0.644    0.520
+## chol:sex    -0.0006235  0.0026248  -0.238    0.812
+## 
+## Residual standard error: 1.158 on 299 degrees of freedom
+## Multiple R-squared:  0.01496,    Adjusted R-squared:  0.005078 
+## F-statistic: 1.514 on 3 and 299 DF,  p-value: 0.211</code></pre>
+<pre class="r"><code>#linear regression without interaction after mean-centering cholesterol and ST wave depression
+heart_dat$chol_c &lt;- heart_dat$chol - mean(heart_dat$chol,na.rm=T)
+heart_dat$oldpeak_c &lt;- heart_dat$oldpeak - mean(heart_dat$oldpeak, na.rm=T)
+heart_dat$sex&lt;-as.factor(heart_dat$sex)
+fit3 &lt;- lm(oldpeak_c ~ chol_c + sex, data=heart_dat)
+summary(fit3)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = oldpeak_c ~ chol_c + sex, data = heart_dat)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.2783 -0.9624 -0.3167  0.6150  5.4895 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept) -0.189146   0.119646  -1.581   0.1150  
+## chol_c       0.001701   0.001310   1.299   0.1949  
+## sex1         0.276866   0.145663   1.901   0.0583 .
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.156 on 300 degrees of freedom
+## Multiple R-squared:  0.01478,    Adjusted R-squared:  0.008207 
+## F-statistic:  2.25 on 2 and 300 DF,  p-value: 0.1072</code></pre>
+<pre class="r"><code>#linear regression with interaction after mean-centering cholesterol and ST wave depression
+fit4 &lt;- lm(oldpeak_c ~ chol_c * sex, data=heart_dat)
+summary(fit4)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = oldpeak_c ~ chol_c * sex, data = heart_dat)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.2475 -0.9723 -0.3109  0.6308  5.5188 
+## 
+## Coefficients:
+##               Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept) -0.1936812  0.1213465  -1.596   0.1115  
+## chol_c       0.0020028  0.0018255   1.097   0.2735  
+## sex1         0.2791559  0.1462103   1.909   0.0572 .
+## chol_c:sex1 -0.0006235  0.0026248  -0.238   0.8124  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.158 on 299 degrees of freedom
+## Multiple R-squared:  0.01496,    Adjusted R-squared:  0.005078 
+## F-statistic: 1.514 on 3 and 299 DF,  p-value: 0.211</code></pre>
+<pre class="r"><code>#Plotting the regression without interaction
+heartdata&lt;-heart
+heartdata$chol_c &lt;- heartdata$chol - mean(heartdata$chol,na.rm=T)
+heartdata$oldpeak_c &lt;- heartdata$oldpeak - mean(heartdata$oldpeak, na.rm=T)
+
+newdat&lt;-heart_dat
+newdat$sex &lt;- as.numeric(newdat$sex)
+fit5&lt;-lm(oldpeak_c~chol_c+sex, data=heartdata)
+newdat$pred2&lt;-predict(fit5,newdat)
+newdat$pred1&lt;-predict(fit5,newdat)
+new1&lt;-newdat%&gt;%select(chol,oldpeak,pred2,pred1)%&gt;%gather(sex,pred2,pred1,-c(chol,oldpeak))
+new1$sex&lt;-factor(newdat$sex,labels=c(&quot;Male&quot;,&quot;Female&quot;))
+ggplot(new1,aes(x=chol,y=oldpeak))+geom_point()+ geom_smooth(method=&quot;lm&quot;,formula=y~1,se=F,fullrange=T,aes(color=sex))+  theme(legend.position=c(.8,.8))+ggtitle(&quot;Graph of multiple regression&quot;) </code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code>#Plotting the regression with interaction
+heartdata&lt;-heart
+heartdata$chol_c &lt;- heartdata$chol - mean(heartdata$chol,na.rm=T)
+heartdata$oldpeak_c &lt;- heartdata$oldpeak - mean(heartdata$oldpeak, na.rm=T)
+
+newdat&lt;-heart_dat
+newdat$sex &lt;- as.numeric(newdat$sex)
+fit6&lt;-lm(oldpeak_c~chol_c*sex, data=heartdata)
+newdat$pred2&lt;-predict(fit6,newdat)
+newdat$pred1&lt;-predict(fit6,newdat)
+new1&lt;-newdat%&gt;%select(chol,oldpeak,pred2,pred1)%&gt;%gather(sex,pred2,pred1,-c(chol,oldpeak))
+new1$sex&lt;-factor(newdat$sex,labels=c(&quot;Male&quot;,&quot;Female&quot;))
+ggplot(new1,aes(x=chol,y=oldpeak))+geom_point()+ geom_smooth(method=&quot;lm&quot;,formula=y~1,se=F,fullrange=T,aes(color=sex))+  theme(legend.position=c(.8,.8))+ggtitle(&quot;Graph of multiple regression&quot;) </code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+<pre class="r"><code>#checking assumptions of linearity, normality, and homoskedacity (for fit without interaction)
+resids&lt;- fit5$residuals
+fitvals&lt;-fit5$fitted.values
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, color=&#39;red&#39;) + ggtitle(&quot;Graph of residuals vs fitted values without interaction&quot;)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-4-3.png" width="672" /></p>
+<pre class="r"><code>library(lmtest) </code></pre>
+<pre><code>## Loading required package: zoo</code></pre>
+<pre><code>## 
+## Attaching package: &#39;zoo&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     as.Date, as.Date.numeric</code></pre>
+<pre class="r"><code>library(sandwich)
+bptest(fit5)</code></pre>
+<pre><code>## 
+##  studentized Breusch-Pagan test
+## 
+## data:  fit5
+## BP = 0.40324, df = 2, p-value = 0.8174</code></pre>
+<pre class="r"><code>ggplot() + geom_histogram(aes(resids), bins=20) + ggtitle(&quot;Histogram of residuals&quot;)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-4-4.png" width="672" /></p>
+<pre class="r"><code>ggplot() +geom_qq(aes(sample=resids))+ geom_qq_line(aes(sample=resids)) + ggtitle(&quot;Q-Q plot&quot;)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-4-5.png" width="672" /></p>
+<pre class="r"><code>#checking assumptions of linearity, normality, and homoskedacity (for fit with interaction)
+resids2&lt;- fit6$residuals
+fitvals2&lt;-fit6$fitted.values
+ggplot()+geom_point(aes(fitvals2,resids2))+geom_hline(yintercept=0, color=&#39;red&#39;)+ ggtitle(&quot;Graph of residuals vs fitted values with interaction&quot;)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-4-6.png" width="672" /></p>
+<pre class="r"><code>library(lmtest) 
+library(sandwich)
+bptest(fit6)</code></pre>
+<pre><code>## 
+##  studentized Breusch-Pagan test
+## 
+## data:  fit6
+## BP = 0.80289, df = 3, p-value = 0.8488</code></pre>
+<pre class="r"><code>ggplot() + geom_histogram(aes(resids2), bins=20) + ggtitle(&quot;Histogram of residuals with interaction&quot;)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-4-7.png" width="672" /></p>
+<pre class="r"><code>ggplot() +geom_qq(aes(sample=resids2))+ geom_qq_line(aes(sample=resids2)) + ggtitle(&quot;Q-Q plot with interaction&quot;)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-4-8.png" width="672" /></p>
+<pre class="r"><code>#Recomputing with robust standard errors (for fit without interaction)
+coeftest(fit5, vcov = vcovHC(fit5))</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##               Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept) -0.1891459  0.1189949 -1.5895  0.11299  
+## chol_c       0.0017013  0.0014249  1.1939  0.23345  
+## sex          0.2768657  0.1472305  1.8805  0.06101 .
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>#Recomputing with robust standard errors (for fit with interaction)
+coeftest(fit6, vcov = vcovHC(fit6))</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##                Estimate  Std. Error t value Pr(&gt;|t|)  
+## (Intercept) -0.19368124  0.12394205 -1.5627  0.11919  
+## chol_c       0.00200285  0.00207197  0.9666  0.33450  
+## sex          0.27915586  0.14948918  1.8674  0.06282 .
+## chol_c:sex  -0.00062352  0.00287010 -0.2172  0.82816  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>#Proportion of variation
+sum((fitvals-mean(heart_dat$oldpeak))^2)/sum((heart_dat$oldpeak-mean(heart_dat$oldpeak))^2)</code></pre>
+<pre><code>## [1] 0.8191364</code></pre>
+<p>#Linear Regression with bootstrapped strapped standard errors
+##I reran the same regression model with interaction but with bootstrapped standard errors. I also ran the bootstrapped residual standard errors for comparison.Overall the bootstrapped standard errors gave more conservative (larger) estimates than the residual standard errors, so I decided to go with the bootstrapped standard errors. The standard errors from the original standard errors, the robust standard errors, and the bootstrapped standard errors are all similar in value across all variables. For example for cholesterol, the SE is 0.0018, the robust SE is 0.0021, and the bootstrapped SE is 0.0022. Overall, they are all fairly similar although they slightly increase across different methods of calculating SE. The p-values for all variables across methods remain not signficant.</p>
+<pre class="r"><code>#Bootstrapped Standard Error 
+boot_dat&lt;-heart_dat[sample(nrow(heart_dat),replace=TRUE),]
+
+samp_distn&lt;-replicate(5000, {   
+  boot_dat&lt;-heart_dat[sample(nrow(heart_dat),replace=TRUE),]   
+  fit&lt;-lm(oldpeak_c~chol_c*sex,data=boot_dat)   
+coef(fit) })
+
+##Estimated SEs
+samp_distn%&gt;%t%&gt;%as.data.frame%&gt;%summarize_all(sd)</code></pre>
+<pre><code>##   (Intercept)      chol_c      sex1 chol_c:sex1
+## 1    0.121348 0.002142637 0.1463741 0.002939993</code></pre>
+<pre class="r"><code>#comparison to standard error and robust standard error for model with interaction from above
+fit6&lt;-lm(oldpeak_c~chol_c*sex, data=heartdata)
+coeftest(fit6)</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##                Estimate  Std. Error t value Pr(&gt;|t|)  
+## (Intercept) -0.19368124  0.12134650 -1.5961  0.11152  
+## chol_c       0.00200285  0.00182552  1.0971  0.27346  
+## sex          0.27915586  0.14621033  1.9093  0.05718 .
+## chol_c:sex  -0.00062352  0.00262483 -0.2375  0.81239  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>coeftest(fit6, vcov = vcovHC(fit6))</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##                Estimate  Std. Error t value Pr(&gt;|t|)  
+## (Intercept) -0.19368124  0.12394205 -1.5627  0.11919  
+## chol_c       0.00200285  0.00207197  0.9666  0.33450  
+## sex          0.27915586  0.14948918  1.8674  0.06282 .
+## chol_c:sex  -0.00062352  0.00287010 -0.2172  0.82816  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>#Logistic Regression
+##I decided to use a logistic regression to predict either a healthy heart or heart disease state based off two explanatory variables - ST wave depression and chest pain type. The heart state is under the variable ‘target’ where 0=healthy and 1=heart disease. Controlling for chest pain type, a decrease in ST wave depression increases chances of not having heart disease (p=3.56e-08&lt;0.05). Compared to chest pain type 0, all other chest pain types have a higher probability of the patient having heart disease. Next, the odds were observed by exponentiating all of the coefficientts. The odds of a patient having heart disease with an ST wave depression of 0 mm and a chest pain type of 0 is 0.97. Every 1mm increase in ST wave depression, increases odds of heart disase by a factor of 0.4. Compared to chest pain (CP) type 0, odds for CP1 are 6.6 times higher, odds for CP2 are 9.57 times higehr, and odds for CP 3 are 9.24 times higher. The accuracy was computed to be 0.768. The probability of predicting if a patient has heart disease if they really have it, otherwise known as the sensitivity or true positive rate, is 0.815. The specificity, or the true negative rate, was calculated to be 0.724. The precision (PPV), or the proportion of those classified as having heart disease who actually do have it, was calculated to be 0.745. Next, the ROC plot was made and the AUC was calculated to be 0.8417. This indicates that the model does a fairly good job at predicting if a patient has heart disease. The defined cutoffs for a good AUC is 0.8 to 0.9. Of course, there is still room for improvement; making the auc higher would be ideal, especially since the false negative rate is 0.276. In a clinical setting, this false negative rate for predicting heart disease could have serious impacts and risks because if a patient was sent home on the premise that they were healthy, their life could be endangered. Next, the model was tested under a 10-fold cross validation. Under the 10-fold CV, the model was fairly good at predicting heart disease. The cross-validation AUC was 0.826, which is only 0.0157 lower than the original AUC. This means that the model did not way overfit the data. After CV, the average out of sample accuracy was 0.756, sensitivity was 0.847, specificity was 0.643, and PPV was 0.745.</p>
+<pre class="r"><code>#Logistic regresssion
+heart_dat$cp &lt;- factor(heart_dat$cp)
+logfit &lt;- glm(target ~ oldpeak_c + cp, data=heart_dat, family=&quot;binomial&quot;)
+coeftest(logfit)</code></pre>
+<pre><code>## 
+## z test of coefficients:
+## 
+##             Estimate Std. Error z value  Pr(&gt;|z|)    
+## (Intercept) -0.95349    0.20563 -4.6370 3.536e-06 ***
+## oldpeak_c   -0.89266    0.16197 -5.5114 3.560e-08 ***
+## cp1          1.88743    0.43067  4.3825 1.173e-05 ***
+## cp2          2.25944    0.35404  6.3819 1.749e-10 ***
+## cp3          2.22375    0.55620  3.9981 6.386e-05 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>exp(coeftest(logfit))</code></pre>
+<pre><code>## 
+## z test of coefficients:
+## 
+##             Estimate Std. Error  z value Pr(&gt;|z|)
+## (Intercept)  0.38539    1.22830   0.0097        1
+## oldpeak_c    0.40956    1.17582   0.0040        1
+## cp1          6.60239    1.53829  80.0389        1
+## cp2          9.57775    1.42481 591.0610        1
+## cp3          9.24193    1.74404  54.4939        1</code></pre>
+<pre class="r"><code>#Confusion matrix
+prob&lt;-predict(logfit, type=&quot;response&quot;)
+pred &lt;- ifelse(prob&gt;0.5, 1, 0)
+table(truth=heart_dat$target, prediction=pred)%&gt;% addmargins</code></pre>
+<pre><code>##      prediction
+## truth   0   1 Sum
+##   0   110  28 138
+##   1    42 123 165
+##   Sum 152 151 303</code></pre>
+<pre class="r"><code>#Computing accuracy, sensitivity, and specificity 
+#accuracy
+(110+123)/303</code></pre>
+<pre><code>## [1] 0.7689769</code></pre>
+<pre class="r"><code>#sensitivity (TPR)
+123/151</code></pre>
+<pre><code>## [1] 0.8145695</code></pre>
+<pre class="r"><code>#specificity (TNR)
+110/152</code></pre>
+<pre><code>## [1] 0.7236842</code></pre>
+<pre class="r"><code>#precision (PPV)
+123/165</code></pre>
+<pre><code>## [1] 0.7454545</code></pre>
+<pre class="r"><code>#Plot density of log odds (logit) by target outcome variable
+heart_dat$logit&lt;-predict(logfit,type=&quot;link&quot;)
+heart_dat$target &lt;- as.factor(heart_dat$target)
+heart_dat%&gt;%ggplot()+geom_density(aes(logit,color=target,fill=target), alpha=.4)+
+  theme(legend.position=c(.85,.85))+geom_vline(xintercept=0)+xlab(&quot;predictor (logit)&quot;)+ggtitle(&quot;Density of log odds graph&quot;)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre class="r"><code>#Generating ROC curve 
+library(plotROC)
+heart_dat &lt;- heart %&gt;% select(-c(&quot;trestbps&quot;, &quot;fbs&quot;, &quot;restecg&quot;, &quot;thalach&quot;, &quot;slope&quot;, &quot;thal&quot;))
+ROCplot &lt;- ggplot(heart_dat) + geom_roc(aes(d=target,m=prob), n.cuts=0)+ geom_segment(aes(x=0,xend=1,y=0,yend=1), lty=2) + ggtitle(&quot;ROC plot&quot;)
+ROCplot</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-6-2.png" width="672" /></p>
+<pre class="r"><code>calc_auc(ROCplot)</code></pre>
+<pre><code>##   PANEL group       AUC
+## 1     1    -1 0.8417435</code></pre>
+<pre class="r"><code>#10-fold Cross Validation 
+#creating a smaller data frame to only include the variables of interest for the model
+library(boot)
+heartdat_cv &lt;- heart_dat%&gt;% select(c(target, cp, oldpeak))
+heartdat_cv&lt;-na.omit(heartdat_cv)
+heartdat_cv$cp &lt;- as.numeric(heartdat_cv$cp)
+heartdat_cv$oldpeak &lt;- as.numeric(heartdat_cv$oldpeak)
+heartdat_cv$target &lt;- as.numeric(heartdat_cv$target)
+
+fit_cv&lt;-glm(target~cp+oldpeak, data=heartdat_cv, family=&quot;binomial&quot;)
+summary(fit_cv)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = target ~ cp + oldpeak, family = &quot;binomial&quot;, data = heartdat_cv)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.5679  -0.8013   0.4469   0.7114   2.3879  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)   0.2418     0.2175   1.112    0.266    
+## cp            1.0059     0.1502   6.696 2.14e-11 ***
+## oldpeak      -1.0111     0.1573  -6.429 1.28e-10 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 417.64  on 302  degrees of freedom
+## Residual deviance: 300.53  on 300  degrees of freedom
+## AIC: 306.53
+## 
+## Number of Fisher Scoring iterations: 5</code></pre>
+<pre class="r"><code>prob_cv &lt;- predict(fit_cv, type=&quot;response&quot;)
+pred_cv&lt;- ifelse(prob&gt;0.5, 1, 0)
+rbind(prob_cv, pred_cv, truth=heartdat_cv$target)[,1:10]%&gt;% round(3)</code></pre>
+<pre><code>##             1     2     3     4    5     6     7     8     9    10
+## prob_cv 0.718 0.217 0.458 0.608 0.41 0.459 0.483 0.777 0.852 0.654
+## pred_cv 1.000 0.000 1.000 1.000 0.00 0.000 1.000 1.000 1.000 1.000
+## truth   1.000 1.000 1.000 1.000 1.00 1.000 1.000 1.000 1.000 1.000</code></pre>
+<pre class="r"><code>table(predictions=pred_cv, truth=heartdat_cv$target)</code></pre>
+<pre><code>##            truth
+## predictions   0   1
+##           0 110  42
+##           1  28 123</code></pre>
+<pre class="r"><code>heartdat_cv$prob_cv&lt;-predict(fit_cv,type=&quot;response&quot;)
+
+#Creating function for class diagnostics
+class_diag&lt;-function(probs,truth){
+  
+  tab&lt;-table(factor(probs&gt;.5,levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+  
+  if(is.numeric(truth)==FALSE &amp; is.logical(truth)==FALSE) truth&lt;-as.numeric(truth)-1
+  
+  #calculating exact AUC
+  ord&lt;-order(probs, decreasing=TRUE)
+  probs &lt;- probs[ord]; truth &lt;- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup&lt;-c(probs[-1]&gt;=probs[-length(probs)], FALSE)
+  TPR&lt;-c(0,TPR[!dup],1); FPR&lt;-c(0,FPR[!dup],1)
+  
+  n &lt;- length(TPR)
+  auc&lt;- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+  
+  data.frame(acc,sens,spec,ppv,auc)
+}
+
+
+variable &lt;- class_diag(heartdat_cv$prob_cv, heartdat_cv$target)
+variable</code></pre>
+<pre><code>##         acc      sens      spec       ppv       auc
+## 1 0.7557756 0.8424242 0.6521739 0.7433155 0.8336188</code></pre>
+<pre class="r"><code>#10-fold Cross validation 
+set.seed(1234)
+k=10
+
+data1 &lt;- heartdat_cv[sample(nrow(heartdat_cv)),]
+folds &lt;- cut(seq(1:nrow(heartdat_cv)), breaks=k, labels=F)
+
+diags&lt;-NULL
+for(i in 1:k){ 
+  train&lt;-data1[folds!=i,] 
+  test&lt;-data1[folds==i,] 
+  truth&lt;-test$target
+  
+  fit_cv&lt;- glm(target~., data=train, family=&quot;binomial&quot;)
+    probs_cv&lt;- predict(fit_cv, newdata=test, type=&quot;response&quot;)
+      
+      diags&lt;-rbind(diags,class_diag(probs_cv,truth)) 
+}
+apply(diags,2,mean)</code></pre>
+<pre><code>##       acc      sens      spec       ppv       auc 
+## 0.7488172 0.8277147 0.6334421 0.7392621 0.8234790</code></pre>
+<p>#LASSO regression
+##Using the same binary prediction variable as above (target heart state) a LASSO regression was run. The regression was run setting lambda equal to cv$lamdba.1se. The results revealed that age, sex, chest pain type, exercise-induced angina, ST wave depression, number of major vessels (ca) and cholesterol levels are the most important predictors of having a healthy heart or having heart disease. A 10-fold CV was run using this model. From this model, the accuracy and AUC were both higher than those from the logistic regression performed earlier in part 5. From the LASSO regression model, the accuracy was 0.802 and the AUC was 0.886. From the earlier logistic regression model, the accuracy was 0.756 and the AUC was 0.826. The LASSO regression model brings the AUC to be closer to the “great” range, whic is defined as an AUC between 0.9-1.0.</p>
+<pre class="r"><code>#LASSO regularization on a logistic regression (data has categorical variables)
+library(glmnet)</code></pre>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## 
+## Attaching package: &#39;Matrix&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:tidyr&#39;:
+## 
+##     expand, pack, unpack</code></pre>
+<pre><code>## Loaded glmnet 3.0-1</code></pre>
+<pre class="r"><code>heartdat_lasso &lt;- heart_dat
+
+#turning some variables into factor because they are categorical variables
+heartdat_lasso$sex &lt;- as.factor(heartdat_lasso$sex)
+heartdat_lasso$exang &lt;- as.factor(heartdat_lasso$exang)
+heartdat_lasso$cp &lt;- as.factor(heartdat_lasso$cp)
+
+
+
+fit_lasso &lt;- glm(target ~ -1+ age + sex + cp +exang+oldpeak+ca+chol, data = heartdat_lasso, family = &quot;binomial&quot;) 
+head(model.matrix(fit))</code></pre>
+<pre><code>##   (Intercept) chol sex
+## 1           1  233   1
+## 2           1  250   1
+## 3           1  204   0
+## 4           1  236   1
+## 5           1  354   0
+## 6           1  192   1</code></pre>
+<pre class="r"><code>set.seed(1234) 
+x&lt;-model.matrix(fit_lasso) 
+
+x&lt;-scale(x) 
+
+y&lt;-as.matrix(heart_dat$target)
+
+cv2&lt;-cv.glmnet(x,y,family=&quot;binomial&quot;) 
+
+lasso2&lt;-glmnet(x,y,family=&quot;binomial&quot;,lambda=cv2$lambda.1se) 
+coef(cv2)</code></pre>
+<pre><code>## 11 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                         1
+## (Intercept)  1.887303e-01
+## age         -1.072112e-01
+## sex0         3.786854e-01
+## sex1        -5.637666e-15
+## cp1          2.346763e-01
+## cp2          5.003048e-01
+## cp3          1.932765e-01
+## exang1      -4.723266e-01
+## oldpeak     -5.904110e-01
+## ca          -5.296755e-01
+## chol         .</code></pre>
+<pre class="r"><code>k=10 
+
+data1&lt;-heartdat_lasso[sample(nrow(heartdat_lasso)),] 
+folds&lt;-cut(seq(1:nrow(heartdat_lasso)),breaks=k,labels=F)
+
+diags&lt;-NULL 
+for(i in 1:k){   
+  train&lt;-data1[folds!=i,]   
+  test&lt;-data1[folds==i,]   
+  truth&lt;-test$target
+  
+  fit&lt;-glm(target~.,data=train,family=&quot;binomial&quot;)   
+  probs&lt;-predict(fit,newdata = test,type=&quot;response&quot;)
+
+  diags&lt;-rbind(diags,class_diag(probs,truth)) }
+
+diags%&gt;%summarize_all(mean)</code></pre>
+<pre><code>##         acc      sens      spec       ppv       auc
+## 1 0.8088172 0.8528188 0.7585304 0.8161212 0.8883896</code></pre>
+
+              <hr>
+              <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div>
+            </div>
+          </div>
+          <hr>
+        <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+        </div>
+      </div>
+      
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>
