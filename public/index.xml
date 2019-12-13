@@ -26,7 +26,25 @@
       <pubDate>Mon, 09 Dec 2019 00:00:00 +0000</pubDate>
       
       <guid>/blog/introduction-to-python/</guid>
-      <description> import numpy as np import json a=np.array([range(10)]) a**2 ## array([[ 0, 1, 4, 9, 16, 25, 36, 49, 64, 81]]) </description>
+      <description> #import numpy as np #import pandas as pd #import seaborn as sns #import matplotlib.pyplot as plt  #df = pd.read_csv(&amp;#39;/kaggle/input/top50spotify2019/top50.csv&amp;#39;,encoding=&amp;#39;ISO-8859-1&amp;#39;)  </description>
+    </item>
+    
+    <item>
+      <title>Project 2: Modeling, Testing, and Predicting</title>
+      <link>/project2/</link>
+      <pubDate>Wed, 20 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/project2/</guid>
+      <description>Sydney Pham  Introduction For this project, I chose a dataset exploring various factors that may predict the onset of heart disease. I obtained the dataset from the website Kaggle, but the data itself was compiled from various doctors from around the world including Switzerland, Budapest, Cleveland and Long Beach. There are a total of 14 variables in the dataset, but I decided to keep the following eight: 1) age of the patient, 2) sex (0=female, 1=male), 3) cp - chest pain type experienced (0=typical angina, 1= atypical angina, 2=non-anginal pain, 3=asyptomatic), 4) chol - the patient’s cholesterol measurement in mg/dl, 5) exang - exercise induced angina ( 0=no, 1=yes), 6) oldpeak - ST depression induced by exercise relative to rest, 7) ca - the number of major vessels by fluoroscopy (0-3), 8) target - heart state (0=healthy, 1=heart disease).</description>
+    </item>
+    
+    <item>
+      <title>EDA Project</title>
+      <link>/project1/</link>
+      <pubDate>Thu, 31 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/project1/</guid>
+      <description>Sydney Pham  Introduction The first dataset I decided to use contains ramen ratings for over 3,000 different types of ramen from across the world. Originally titled “ramen_ratings”, I acquired this dataset from tidytuesday on Github. This dataset was created by Hans Lienesch, a man who has dedicated his life to eating and rating ramen. Each entry contains a review number, the brand of ramen, the variety of ramen, country of origin, packaging style, and rating on a continuous scale of 0.</description>
     </item>
     
     <item>
@@ -39,24 +57,6 @@
   Project 1
   Project 2
   </description>
-    </item>
-    
-    <item>
-      <title>EDA Project</title>
-      <link>/project1/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/project1/</guid>
-      <description>###Sydney Pham #Introduction ####The first dataset I decided to use contains ramen ratings for over 3,000 different types of ramen from across the world. Originally titled “ramen_ratings”, I acquired this dataset from tidytuesday on Github. This dataset was created by Hans Lienesch, a man who has dedicated his life to eating and rating ramen. Each entry contains a review number, the brand of ramen, the variety of ramen, country of origin, packaging style, and rating on a continuous scale of 0.</description>
-    </item>
-    
-    <item>
-      <title>Project 2: Modeling, Testing, and Predicting</title>
-      <link>/project2/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/project2/</guid>
-      <description>###Sydney Pham #Introduction ####For this project, I chose a dataset exploring various factors that may predict the onset of heart disease. I obtained the dataset from the website Kaggle, but the data itself was compiled from various doctors from around the world including Switzerland, Budapest, Cleveland and Long Beach. There are a total of 14 variables in the dataset, but I decided to keep the following eight: 1) age of the patient, 2) sex (0=female, 1=male), 3) cp - chest pain type experienced (0=typical angina, 1= atypical angina, 2=non-anginal pain, 3=asyptomatic), 4) chol - the patient’s cholesterol measurement in mg/dl, 5) exang - exercise induced angina ( 0=no, 1=yes), 6) oldpeak - ST depression induced by exercise relative to rest, 7) ca - the number of major vessels by fluoroscopy (0-3), 8) target - heart state (0=healthy, 1=heart disease).</description>
     </item>
     
   </channel>

@@ -26,7 +26,7 @@
       <pubDate>Mon, 09 Dec 2019 00:00:00 +0000</pubDate>
       
       <guid>/blog/introduction-to-python/</guid>
-      <description> import numpy as np import json a=np.array([range(10)]) a**2 ## array([[ 0, 1, 4, 9, 16, 25, 36, 49, 64, 81]]) </description>
+      <description> #import numpy as np #import pandas as pd #import seaborn as sns #import matplotlib.pyplot as plt  #df = pd.read_csv(&amp;#39;/kaggle/input/top50spotify2019/top50.csv&amp;#39;,encoding=&amp;#39;ISO-8859-1&amp;#39;)  </description>
     </item>
     
   </channel>
