@@ -16,8 +16,16 @@ library(reticulate)
 
 ```{python}
 import numpy as np
-import json 
-a=np.array([range(10)])
-a**2
+import pandas as pd 
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+```
+
+```{python}
+df = pd.read_csv('/kaggle/input/top50spotify2019/top50.csv',encoding='ISO-8859-1')
+
+
+
 ```
 
