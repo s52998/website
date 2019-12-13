@@ -7,6 +7,8 @@ categories: []
 tags: []
 description: ''
 ---
+![](/blog/2019-12-09-introduction-to-python_files/fiji.jpeg)
+
 #### I was first introduced to python just a few weeks ago! I wanted to make a blog post showing some basic python commands that I've learned. I've always wanted to travel to Fiji, so I decided to use the R dataset "quakes" that has the locations of 1000 seismic events that occured near Fiji. In this dataset, the variables are latitude of event (lat), longitude (long), depth (depth), and magnitude on the Richter Scale (mag).
 ```{r setup, include=FALSE}
 #install.packages("reticulate")
@@ -42,3 +44,18 @@ print(np.mean(r.quakes.depth))
 print(np.mean(r.quakes.mag))
 
 ```
+```{python}
+import matplotlib.pyplot as plt 
+
+plt.boxplot(r.quakes['mag'])
+plt.title("Box Plot of Magnitudes")
+plt.show()
+
+```
+
+```{python}
+plt.hist(r.quakes['mag'])
+plt.title("Histogram of magnitudes")
+plt.show()
+```
+

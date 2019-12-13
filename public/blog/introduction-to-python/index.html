@@ -72,6 +72,7 @@
               
 
 
+<p><img src="/blog/2019-12-09-introduction-to-python_files/fiji.jpeg" /></p>
 <div id="i-was-first-introduced-to-python-just-a-few-weeks-ago-i-wanted-to-make-a-blog-post-showing-some-basic-python-commands-that-ive-learned.-ive-always-wanted-to-travel-to-fiji-so-i-decided-to-use-the-r-dataset-quakes-that-has-the-locations-of-1000-seismic-events-that-occured-near-fiji.-in-this-dataset-the-variables-are-latitude-of-event-lat-longitude-long-depth-depth-and-magnitude-on-the-richter-scale-mag." class="section level4">
 <h4>I was first introduced to python just a few weeks ago! I wanted to make a blog post showing some basic python commands that I’ve learned. I’ve always wanted to travel to Fiji, so I decided to use the R dataset “quakes” that has the locations of 1000 seismic events that occured near Fiji. In this dataset, the variables are latitude of event (lat), longitude (long), depth (depth), and magnitude on the Richter Scale (mag).</h4>
 <pre class="python"><code>import numpy as np
@@ -100,6 +101,18 @@ import pandas as pd</code></pre>
 <h2>Mean of magnitude</h2>
 <pre class="python"><code>print(np.mean(r.quakes.mag))</code></pre>
 <pre><code>## 4.62039999999999</code></pre>
+<pre class="python"><code>import matplotlib.pyplot as plt 
+
+plt.boxplot(r.quakes[&#39;mag&#39;])</code></pre>
+<pre><code>## {&#39;whiskers&#39;: [&lt;matplotlib.lines.Line2D object at 0x12a786ad0&gt;, &lt;matplotlib.lines.Line2D object at 0x12a796c10&gt;], &#39;caps&#39;: [&lt;matplotlib.lines.Line2D object at 0x126b4a5d0&gt;, &lt;matplotlib.lines.Line2D object at 0x12a7a6650&gt;], &#39;boxes&#39;: [&lt;matplotlib.lines.Line2D object at 0x12a786a90&gt;], &#39;medians&#39;: [&lt;matplotlib.lines.Line2D object at 0x12a7a6b90&gt;], &#39;fliers&#39;: [&lt;matplotlib.lines.Line2D object at 0x12a796c90&gt;], &#39;means&#39;: []}</code></pre>
+<pre class="python"><code>plt.title(&quot;Box Plot of Magnitudes&quot;)
+plt.show()</code></pre>
+<p><img src="/blog/2019-12-09-introduction-to-python_files/figure-html/unnamed-chunk-6-1.png" /><!-- --></p>
+<pre class="python"><code>plt.hist(r.quakes[&#39;mag&#39;])</code></pre>
+<pre><code>## (array([191., 186., 306., 119.,  90.,  70.,  23.,  10.,   4.,   1.]), array([4.  , 4.24, 4.48, 4.72, 4.96, 5.2 , 5.44, 5.68, 5.92, 6.16, 6.4 ]), &lt;a list of 10 Patch objects&gt;)</code></pre>
+<pre class="python"><code>plt.title(&quot;Histogram of magnitudes&quot;)
+plt.show()</code></pre>
+<p><img src="/blog/2019-12-09-introduction-to-python_files/figure-html/unnamed-chunk-7-1.png" /><!-- --></p>
 </div>
 
               <hr>
