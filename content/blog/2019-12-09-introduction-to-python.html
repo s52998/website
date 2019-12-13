@@ -10,10 +10,28 @@ description: ''
 
 
 
-<pre class="python"><code>#import numpy as np
-#import pandas as pd 
-#import seaborn as sns
-#import matplotlib.pyplot as plt
-</code></pre>
-<pre class="python"><code>#df = pd.read_csv(&#39;/kaggle/input/top50spotify2019/top50.csv&#39;,encoding=&#39;ISO-8859-1&#39;)
-</code></pre>
+<div id="i-was-first-introduced-to-python-just-a-few-weeks-ago-i-wanted-to-make-a-blog-post-showing-some-basic-python-commands-that-ive-learned.-ive-always-wanted-to-travel-to-fiji-so-i-decided-to-use-the-r-dataset-quakes-that-has-the-locations-of-1000-seismic-events-that-occured-near-fiji.-in-this-dataset-the-variables-are-latitude-of-event-lat-longitude-long-depth-depth-and-magnitude-on-the-richter-scale-mag." class="section level1">
+<h1>I was first introduced to python just a few weeks ago! I wanted to make a blog post showing some basic python commands that I’ve learned. I’ve always wanted to travel to Fiji, so I decided to use the R dataset “quakes” that has the locations of 1000 seismic events that occured near Fiji. In this dataset, the variables are latitude of event (lat), longitude (long), depth (depth), and magnitude on the Richter Scale (mag).</h1>
+<pre class="python"><code>import numpy as np
+import pandas as pd</code></pre>
+</div>
+<div id="maximum-and-minimum-values-of-depth" class="section level1">
+<h1>Maximum and minimum values of depth</h1>
+<pre class="python"><code>print(np.max(r.quakes.depth))</code></pre>
+<pre><code>## 680</code></pre>
+<pre class="python"><code>print(np.min(r.quakes.depth))</code></pre>
+<pre><code>## 40</code></pre>
+</div>
+<div id="maximum-and-minimum-values-of-magnitude" class="section level1">
+<h1>Maximum and minimum values of magnitude</h1>
+<pre class="python"><code>print(np.max(r.quakes.mag))</code></pre>
+<pre><code>## 6.4</code></pre>
+<pre class="python"><code>print(np.min(r.quakes.mag))</code></pre>
+<pre><code>## 4.0</code></pre>
+<p>#Mean of quakes</p>
+<pre class="python"><code>print(np.mean(r.quakes.depth))</code></pre>
+<pre><code>## 311.371</code></pre>
+<p>#Mean of magnitude</p>
+<pre class="python"><code>print(np.mean(r.quakes.mag))</code></pre>
+<pre><code>## 4.62039999999999</code></pre>
+</div>

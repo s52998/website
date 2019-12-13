@@ -26,7 +26,7 @@
       <pubDate>Mon, 09 Dec 2019 00:00:00 +0000</pubDate>
       
       <guid>/blog/introduction-to-python/</guid>
-      <description> #import numpy as np #import pandas as pd #import seaborn as sns #import matplotlib.pyplot as plt  #df = pd.read_csv(&amp;#39;/kaggle/input/top50spotify2019/top50.csv&amp;#39;,encoding=&amp;#39;ISO-8859-1&amp;#39;)  </description>
+      <description>I was first introduced to python just a few weeks ago! I wanted to make a blog post showing some basic python commands that I’ve learned. I’ve always wanted to travel to Fiji, so I decided to use the R dataset “quakes” that has the locations of 1000 seismic events that occured near Fiji. In this dataset, the variables are latitude of event (lat), longitude (long), depth (depth), and magnitude on the Richter Scale (mag).</description>
     </item>
     
     <item>
